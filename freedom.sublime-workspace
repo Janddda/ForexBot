@@ -1,0 +1,484 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"handle",
+				"handleCommentSubmit"
+			],
+			[
+				"getInitialState",
+				"getInitialState"
+			],
+			[
+				"GetLocation",
+				"GetLocationCoords"
+			],
+			[
+				"num",
+				"numPrevNodes"
+			],
+			[
+				"hid",
+				"hiddenNodeCount"
+			],
+			[
+				"Out",
+				"outputNodeCount"
+			],
+			[
+				"Hid",
+				"hiddenNodeCount"
+			],
+			[
+				"inputNo",
+				"inputNodeCount"
+			],
+			[
+				"i",
+				"i"
+			],
+			[
+				"add",
+				"add-order-items-button"
+			],
+			[
+				"vendor",
+				"vendor-select"
+			],
+			[
+				"dep",
+				"department-select"
+			],
+			[
+				"du",
+				"dashed  (value)"
+			],
+			[
+				"text-",
+				"text-align"
+			],
+			[
+				"text",
+				"text-align"
+			],
+			[
+				"backgro",
+				"background-color"
+			],
+			[
+				"spac",
+				"letter-spacing"
+			],
+			[
+				"chara",
+				"character-search-button"
+			],
+			[
+				"back",
+				"background-color"
+			],
+			[
+				"characte",
+				"character-search"
+			],
+			[
+				"backg",
+				"background-color"
+			],
+			[
+				"z",
+				"z-index"
+			],
+			[
+				"align",
+				"vertical-align"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 104.0,
+		"last_filter": "Package Control: remove",
+		"selected_items":
+		[
+			[
+				"Package Control: remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"Package Control: insta",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"remove ",
+				"Package Control: Remove Package"
+			],
+			[
+				"Package Control: ",
+				"Package Control: List Unmanaged Packages"
+			],
+			[
+				"list pack",
+				"Package Control: List Packages"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: add",
+				"Package Control: Add Repository"
+			],
+			[
+				"Package Control: install",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: remove package",
+				"Package Control: Remove Package"
+			],
+			[
+				"Package Control: Install",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: instal",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: instal	",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 528.0
+	},
+	"console":
+	{
+		"height": 126.0,
+		"history":
+		[
+			"view.encoding()",
+			"import urllib.request,os,hashlib; h = '2915d1851351e5ee549c20394736b442' + '8bc59f460fa1548d1514676163dafc88'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by) ",
+			"import urllib.request,os; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), 'wb').write(urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ','%20')).read()) "
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/C/Users/Justin/Documents/Forex/Freedom",
+		"/C/Users/Justin/Documents/Forex/Freedom/public"
+	],
+	"file_history":
+	[
+		"/C/Users/Justin/Documents/Forex/Freedom/index.html",
+		"/C/Users/Justin/Documents/Forex/Freedom/streaming.js",
+		"/C/Users/Justin/Documents/Forex/Freedom/app.js",
+		"/C/Users/Justin/Documents/Forex/Freedom/package.json",
+		"/C/pokemon/Pokemon-GO-node-api-master/poke.io.js",
+		"/C/pokemon/Pokemon-GO-node-api-master/package.json",
+		"/C/pokemon/Pokemon-GO-node-api-master/example.js",
+		"/C/React/react-tutorial-master/public/scripts/example.jsx",
+		"/C/React/react-tutorial-master/server.js",
+		"/C/pokemon/Pokemon-GO-node-api-master/pokemon.proto",
+		"/C/React/react-tutorial-master/public/scripts/example.js",
+		"/C/React/react-tutorial-master/server.php",
+		"/C/pokemon/Pokemon-GO-node-api-master/node_modules/geocoder/index.js",
+		"/C/pokemon/Pokemon-GO-node-api-master/node_modules/geocoder/providers/google.js",
+		"/C/pokemon/PokeBot/app.js",
+		"/C/pokemon/PokeBot/package.json",
+		"/C/pokemon/app.js",
+		"/C/Users/Justin/Downloads/Pokemon-GO-node-api-master/Pokemon-GO-node-api-master/example.js",
+		"/C/meteor/socially/client/app.ts",
+		"/C/Users/Justin/Videos/rec.srt",
+		"/C/meteor/socially/.meteor/local/build/programs/web.browser/packages/jquery.js",
+		"/C/meteor/socially/client/index.html",
+		"/C/meteor/socially/client/app.html",
+		"/C/meteor/socially/tsconfig.json",
+		"/C/Windows/System32/drivers/etc/hosts",
+		"/C/meteor/testing/client/main.js",
+		"/C/meteor/testing/imports/components/todosList.js",
+		"/C/meteor/testing/imports/components/testTemplate.html",
+		"/C/meteor/testing/client/main.html",
+		"/C/Users/Justin/Downloads/MC_442_061814_071616.CSV",
+		"/C/Users/Justin/Downloads/meteor-angular2.0-socially-step_00/meteor-angular2.0-socially-step_00/client/app.ts",
+		"/C/meteor/socially/client/main.css",
+		"/C/meteor/socially/typings/main.d.ts",
+		"/C/meteor/socially/client/main.js",
+		"/C/meteor/socially/package.json",
+		"/C/meteor/whatsapp/client/scripts/routes.js",
+		"/C/meteor/whatsapp/client/scripts/lib/app.js",
+		"/C/meteor/whatsapp/client/templates/tabs.html",
+		"/C/meteor/whatsapp/client/templates/chats.html",
+		"/C/meteor/whatsapp/client/index.html",
+		"/C/meteor/simple-todos/imports/ui/Task.jsx",
+		"/C/meteor/simple-todos/client/main.jsx",
+		"/C/meteor/simple-todos/client/main.html",
+		"/C/meteor/simple-todos/imports/ui/App.jsx",
+		"/C/Users/Justin/AppData/Roaming/Sublime Text 3/Packages/SideBarEnhancements/Side Bar.sublime-settings",
+		"/C/Users/Justin/AppData/Roaming/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/C/meteor/test.ts",
+		"/C/Users/Justin/AppData/Roaming/Sublime Text 3/Packages/Default/Preferences.sublime-settings",
+		"/C/.eslintrc.json",
+		"/C/.eshintrc.json",
+		"/C/.eshintrc",
+		"/C/.jshintrc",
+		"/C/Users/Justin/AppData/Roaming/Sublime Text 3/Packages/TypeScript/Preferences.sublime-settings",
+		"/C/wamp/www/forex/network/index.html",
+		"/C/wamp/www/forex/network/js/index.js",
+		"/C/wamp/www/forex/php/get_candles.php",
+		"/E/Users/Justin/AppData/Roaming/Skype/jmathieu3289/chatsync/8a/8a448939a211d9e8.dat",
+		"/C/wamp/www/forex/js/index.js",
+		"/C/wamp/www/forex/php/insert_candles.php",
+		"/C/wamp/www/forex/network.html",
+		"/C/wamp/www/forex/index.html",
+		"/C/wamp/www/forex/data/data.json",
+		"/C/Users/Justin/Documents/GitHub/WMS_Web/appspec.yml",
+		"/C/Users/Justin/Documents/GitHub/WMS_Web/circle.yml",
+		"/C/Users/Justin/Desktop/source/index.html",
+		"/C/Users/Justin/Desktop/circleci-slate-app-master-49c554d",
+		"/C/wamp/www/game/index.js",
+		"/C/wamp/www/game/client.js",
+		"/C/wamp/www/game/index.html",
+		"/E/Users/Justin/Documents/Older Files/eyes.fla",
+		"/C/Users/Justin/Downloads/test/test/address.html",
+		"/C/Users/Justin/Downloads/test/test/index.html",
+		"/C/Users/Justin/Downloads/test_john_schneider/test_john_schneider/index.html",
+		"/C/Users/Justin/Downloads/test_john_schneider/test_john_schneider/address.html",
+		"/C/Users/Justin/Downloads/bpYwMmjnZrg_",
+		"/C/Users/Justin/Documents/Downloads/Ableton Live 9 Suite 9.1.0 (Win 64 bit) (patch IO) [ChingLiu]/ChingLiu.Install.Notes.nfo",
+		"/C/wamp/www/game/package.json",
+		"/C/wamp/www/game/app.js",
+		"/C/wamp/www/game/bin/www",
+		"/C/wamp/www/game/io.js",
+		"/C/wamp/www/game/main.css",
+		"/C/wamp/www/multiplayer/index.html",
+		"/C/wamp/www/multiplayer/app.js",
+		"/C/wamp/www/multiplayer/client.js",
+		"/C/wamp/www/multiplayer/game.core.js",
+		"/C/wamp/www/multiplayer/lib/keyboard.js",
+		"/C/wamp/www/multiplayer/simplest.html",
+		"/C/wamp/www/multiplayer/bin/www",
+		"/C/wamp/www/multiplayer/views/index.jade",
+		"/C/wamp/www/multiplayer/package.json",
+		"/C/wamp/www/multiplayer/index.js",
+		"/C/wamp/www/index.php",
+		"/C/wamp/www/cms/index.html",
+		"/C/wamp/www/cms/js/main.js",
+		"/C/wamp/www/cms/css/main.css",
+		"/C/Users/Justin/Downloads/Uchu Conbini - Somaru Oto wo Kakunin Shitara [2013.30.10] [320kbps].zip",
+		"/E/Oculus/The_Great_River-pc/TheGreatRiver/Engine/Build/build.properties",
+		"/C/Excersism/Excersizes/javascript/bob/bob_test.spec.js",
+		"/C/Excersism/Excersizes/csharp/leap/LeapTest.cs",
+		"/C/Excersism/Excersizes/csharp/leap/README.md",
+		"/C/Excersism/Excersizes/javascript/bob/README.md",
+		"/C/wamp/www/test/deploy/purchase-order.html",
+		"/C/wamp/www/test/deploy/css/main.css",
+		"/C/wamp/www/test/deploy/css/chosen.css",
+		"/C/wamp/www/test/deploy/index.html",
+		"/E/Oculus/ZVR_Apocalypse_Zombie_Showcase_-pc/ZVR_Showcase/ZVR_Showcase_DirectToRift.exe",
+		"/C/Users/Justin/Downloads/WTconfigSST137a.zip",
+		"/C/Users/Justin/Outerra/eng.log",
+		"/E/Oculus/EroRoom.zip",
+		"/C/wamp/www/test/deploy/js/elementTransitions.js",
+		"/C/wamp/www/test/deploy/css/page-animations.css",
+		"/C/wamp/www/test/deploy/style-test.html",
+		"/C/wamp/www/test/deploy/game.html",
+		"/C/Users/Justin/Desktop/http.js",
+		"/C/wamp/bin/apache/apache2.4.9/conf/httpd.conf",
+		"/C/Users/Justin/Desktop/program.js",
+		"/C/Users/Justin/Desktop/module.js",
+		"/C/Program Files (x86)/World of Warcraft/realmlist.wtf",
+		"/C/wamp/bin/apache/apache2.4.9/wampserver.conf",
+		"/C/Users/Justin/Downloads/112111111 (2)/112111111/cart.js",
+		"/C/Users/Justin/Downloads/112111111 (2)/112111111/cartPage.html",
+		"/C/Users/Justin/Downloads/112111111 (2)/112111111/final.js",
+		"/C/Users/Justin/Downloads/112111111 (2)/112111111/final.html",
+		"/C/Users/Justin/Downloads/finalJSProjectUpdate2/final.htm",
+		"/C/Users/Justin/Downloads/finalJSProject/final.js",
+		"/C/Users/Justin/Downloads/finalJSProject/final.htm",
+		"/C/Users/Justin/Downloads/finalJSProject/finalCss.css",
+		"/C/Users/Justin/Downloads/finalJSProject/windowWash"
+	],
+	"find":
+	{
+		"height": 23.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"master",
+			"Ball",
+			"Requests",
+			"ResponseEnvelop",
+			"loadComments",
+			"geocoder.rever",
+			"geocoder",
+			"chart",
+			"o2",
+			"c1",
+			"l1",
+			"h1",
+			"o1",
+			"VR",
+			"DK",
+			"oculus",
+			"mass",
+			"rgba(52, 152, 219",
+			"rgba(41, 128, 185",
+			"#3498db",
+			"#2980b9",
+			"80",
+			"{\n",
+			"/\");",
+			"Listen 80",
+			"();\n",
+			"\"></"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			""
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 34.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.doc":
+	{
+		"height": 100.0
+	},
+	"output.exec":
+	{
+		"height": 100.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "freedom.sublime-project",
+	"replace":
+	{
+		"height": 42.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

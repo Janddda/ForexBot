@@ -1,0 +1,14 @@
+{
+	"folders":
+	[
+		{
+			"file_exclude_patterns":
+			[
+				"freedom.sublime-project",
+				".gitattributes",
+				".gitignore"
+			],
+			"path": "."
+		}
+	]
+}
