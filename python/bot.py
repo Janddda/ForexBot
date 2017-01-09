@@ -1,18 +1,22 @@
 #Imports
 import numpy as np
-import matplotlib.pyplot as plt
 import math
+import cgi, cgitb
+
+from sklearn import tree
+
+print "Content-type: text/html\n\n"    #for showing print on HTML
+
+data = cgi.FieldStorage()
+
+inputFile = data["inputFile"].value 
+x_test = data['xTest'].value
 
 #Data
-data = np.genfromtxt(r"C:\Users\Justin\Downloads\HISTDATA_COM_ASCII_EURUSD_M12016\DAT_ASCII_EURUSD_M1_2016.csv",delimiter=";", usecols = (1,2,3,4), max_rows=5000) #Change this to whatever file is needed and adjust usecols. Currently loads OHLC
-
-#Train/Test ratios
-train_percent = .7
-train_count = math.ceil(len(data)*train_percent)
-test_count = len(data)-train_count
+data = np.genfromtxt(inputFile,delimiter=";", usecols = (1,2,3,4)) #Change this to whatever file is needed and adjust usecols. Currently loads OHLC
 
 #Number of candlesticks to look at per Y value
-n = 3
+n = 5
 
 #Possible Y values (note: these may change depending on the data loaded above)
 OPEN = 0;
@@ -21,15 +25,24 @@ LOW = 2;
 CLOSE = 3;
 
 #Selected Y value
-y_type = 1;
+y_type = 3;
 
-#x_train data
+#Selected CLF
+clf = tree.DecisionTreeRegressor()
 
-x_train = np.concatenate(data[0:n])
+#x_data
+x_data = np.concatenate(data[0:n])
 
-for x in range(1,train_count-n):
-	x_train = np.vstack((x_train,np.concatenate(data[x:x+n])))
+for x in range(1,len(data)-n-1):
+	x_data = np.vstack((x_data,np.concatenate(data[x:x+n])))
 
-#y_train data
+#y_data
+y_data = data[n:len(data)-1,[y_type]]
+y_data = np.ravel(y_data)
 
-y_train = data[:train_count-n,[y_type]]
+#train on input data
+clf.fit(x_data,y_data)
+
+#make a prediction based on the input test
+print clf.predict(x_test)
+
