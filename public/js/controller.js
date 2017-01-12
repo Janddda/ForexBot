@@ -43,6 +43,14 @@ app.controller('myCtrl', function($scope, $http) {
     ];
     $scope.selectedGranularity = "H1";
 
+    $scope.runUnits = [
+        {value: "MINUTE" },
+        {value: "HOUR" },
+        {value: "DAY" },
+        {value: "WEEK" },
+        {value: "MONTH" }
+    ];
+
     $scope.candleCount = 50;
 
     $scope.candlesticks = null;
