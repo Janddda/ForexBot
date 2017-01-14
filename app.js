@@ -13,6 +13,12 @@ var connection = mysql.createConnection({
     database: 'forex'
 });
 
+/*
+ * Interval Variables
+ */
+
+ var watchers = null;
+
 app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname + '/index.html'));
 });
@@ -93,7 +99,38 @@ app.get('/scores', function(req, res) {
 
 });
 
+setInterval(function() {
 
+	//Get watchers that need to run
+	connection.query("SELECT * " + 
+						"FROM watchers " +
+						"WHERE " + 
+							"CASE WHEN run_unit = 'MINUTE' THEN last_updated < NOW() - INTERVAL run_interval MINUTE " +
+						    "WHEN run_unit = 'HOUR' THEN last_updated < NOW() - INTERVAL run_interval HOUR " +
+							"WHEN run_unit = 'DAY' THEN last_updated < NOW() - INTERVAL run_interval DAY " +
+						    "WHEN run_unit = 'WEEK' THEN last_updated < NOW() - INTERVAL run_interval WEEK " +
+						    "WHEN run_unit = 'MONTH' THEN last_updated < NOW() - INTERVAL run_interval MONTH END", function(err, rows, fields) {
+
+        if (err == null) {
+
+            watchers = rows;
+
+            for(var i=0; i<watchers.length; i++) {
+            	
+            	var w = watchers[i];
+
+            	//For each watcher that we have to run through, 
+            	            
+
+            }
+
+        } else {
+            console.log(err);
+        }
+
+    });
+
+}, 10000);
 
 app.use(express.static('public'));
 

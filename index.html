@@ -5,81 +5,200 @@
     <title>F</title>
     <link rel="stylesheet" type="text/css" href="css/vendor/foundation.min.css">
   </head>
-  <body>
+  <body ng-cloak>
   	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.min.js"></script>
     <script src="http://canvasjs.com/assets/script/canvasjs.min.js"></script>
   	<script src="js/vendor/jquery.js"></script>
   	<script src="js/vendor/foundation.min.js"></script>
   	<script src="js/controller.js"></script>
-    <div>
+    <style>
+      h3.text-success {
+        color: green;
+      }
+      td.text-success {
+        color: green;
+      }
+      td.text-alert {
+        color: red;
+      }
+    </style>
+    <div ng-show="state==0">
     	<div class="row">
     		<div class="large-3 columns">
           <h5>Account Details</h5>
     		</div>
         <div class="large-3 columns">
-            <b>Account Currency:</b> {{account.accountCurrency}}
+            <b>Account Balance:</b> {{account.balance | currency}}
         </div>
         <div class="large-3 columns">
-            <b>Account ID:</b> {{account.accountId}}
+            <b>In Use:</b> {{account.marginUsed | currency}}<br>
+            <b>Available:</b> {{account.marginAvail | currency}}
         </div>
         <div class="large-3 columns">
-            <b>Margin Rate:</b> {{account.marginRate}}
+            <b>Open Trades:</b> {{account.openTrades}}<br>
+            <b>Margin Rate: </b> {{account.marginRate}}
         </div>    
     	</div>	
-      <div class="row" style="margin-top: 5vh">
-        <div class="large-3 columns">
-          <h4>Candle Options</h4>
-          <label>Instruments
-            <select ng-options="instrument.instrument as instrument.displayName for instrument in instruments | orderBy: instrument.displayName" ng-model="selectedInstrument">
-            </select>
-          </label>
-          <label>Granularities
-            <select ng-options="granularity.value as granularity.description for granularity in granularities" ng-model="selectedGranularity">
-            </select>
-          </label>
-          <label>Candle Count
-            <input type="number" min=0 max=5000 ng-model="candleCount">
-          </label>
-          <button type="button" class="primary button expanded" ng-click="getCandles()" ng-if="selectedInstrument != null && selectedGranularity != null && candleCount > 0">Get Candlesticks</button>
-        </div>
-        <div class="large-9 columns">
-          <div ng-show="loading">
-            <h1>Loading...</h1>
-          </div>
-          <div ng-show="candlesticks.length > 0 && !loading">
-            <h4>Candlesticks</h4>
-            <span> Show Bid: <input type="checkBox" ng-model="showBid">  Show Ask: <input type="checkBox" ng-model="showAsk"></span>
-            <table style="width: 100%" hidden>
+      <div class="row" style="margin-top: 20px" ng-show="state==0">
+        <div class="row">
+          <div class="large-12 columns">
+            <div class="large-2 columns">
+              <h4>Live Trades</h4>
+            </div>
+            <div class="large-10 columns">
+              <button type="button" class="primary button" ng-click="newOrder()">New Order</button>
+            </div>
+            <table style="width: 100%">
               <thead>
-                <tr>
-                  <th>Timestamp</th>
-                  <th ng-if="showBid">Open Bid</th>
-                  <th ng-if="showAsk">Open Ask</th>
-                  <th ng-if="showBid">High Bid</th>
-                  <th ng-if="showAsk">High Ask</th>
-                  <th ng-if="showBid">Low Bid</th>
-                  <th ng-if="showAsk">Low Ask</th>
-                  <th ng-if="showBid">Close Bid</th>
-                  <th ng-if="showAsk">Close Ask</th>
-                  <th>Volume</th>
-                </tr>
+                <th>Time</th>
+                <th>Instrument</th>
+                <th>Price</th>
+                <th>Live Price</th>
+                <th>Profit ($)</th>
+                <th>Side</th>
+                <th>Stop Loss (Price)</th>
+                <th>Stop Loss (Pips)</th>
+                <th>Units</th>
+                <th></th>
+                <th></th>
               </thead>
-              <tbody ng-repeat="c in candlesticks  | orderBy : c.time : true">
-                <tr>
-                  <td>{{c.time | date : 'M/d/yy h:mm:ss a'}}</td>
-                  <td ng-if="showBid">{{c.openBid}}</td>
-                  <td ng-if="showAsk">{{c.openAsk}}</td>
-                  <td ng-if="showBid">{{c.highBid}}</td>
-                  <td ng-if="showAsk">{{c.highAsk}}</td>
-                  <td ng-if="showBid">{{c.lowBid}}</td>
-                  <td ng-if="showAsk">{{c.lowAsk}}</td>
-                  <td ng-if="showBid">{{c.closeBid}}</td>
-                  <td ng-if="showAsk">{{c.closeAsk}}</td>
-                  <td>{{c.volume}}</td>
-                </tr>
+              <tbody ng-repeat="trade in trades">
+                <td>{{trade.time | date : 'short'}}</td>
+                <td>{{trade.instrument}}</td>
+                <td>{{trade.price}}</td>
+                <td class="{{trade.is_good==true?'text-success':'text-alert'}}">{{trade.live_price}}</td>
+                <td class="{{trade.is_good==true?'text-success':'text-alert'}}">{{trade.profit}}</td>
+                <td>{{trade.side}}</td>
+                <td>{{trade.trailingAmount}}</td>
+                <td>{{trade.trailingStop}}</td>
+                <td>{{trade.units}}</td>
+                <td><button type="button" class="button primary expanded">Edit</button></td>
+                <td><button type="button" class="button alert expanded" ng-click="closeTrade(trade)">Close</button></td>
               </tbody>
             </table>
-            <div id="chartContainer" style="margin: 0px; padding: 0px; height: 300px; width: 100%;">
+          </div>
+        </div>
+        <div class="row">
+          <div class="large-12 columns">
+            <div class="large-2 columns">
+              <h4>Watchers</h4>
+            </div>
+            <div class="large-10 columns">
+              <button type="button" class="primary button" ng-click="newWatcher()">New Watcher</button>
+            </div>
+            <table style="width: 100%">
+              <thead>
+                <th>Instrument</th>
+                <th>Granularity</th>
+                <th>Last Updated</th>
+                <th>Run Interval</th>
+                <th>Run Unit</th>
+                <th>Active</th>
+                <th>Score Threshold</th>
+                <th>Candle Count</th>
+                <th></th>
+                <th></th>
+              </thead>
+              <tbody ng-repeat="w in watchers">
+                <td>{{w.instrument}}</td>
+                <td>{{w.granularity}}</td>
+                <td>{{w.last_updated | date : 'short'}}</td>
+                <td>{{w.run_interval}}</td>
+                <td>{{w.run_unit}}</td>
+                <td>{{w.active}}</td>
+                <td>{{w.score_threshold}}</td>
+                <td>{{w.candle_count}}</td>
+                <td><button type="button" class="button expanded primary">Edit</button></td>
+                <td><button type="button" class="button expanded alert">Delete</button></td>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+        <div class="row">
+          <div class="large-12 columns">
+            <h4>Last 50 Transactions</h4>
+            <table style="width: 100%">
+              <thead>
+                <th>Time</th>
+                <th>Instrument</th>
+                <th>Type</th>
+                <th>Price</th>
+                <th>Side</th>
+                <th>Stop Loss (Pips)</th>
+                <th>Units</th>
+                <th>Profit ($)</th>
+                <th>Interest</th>
+                <th>Account Balance</th>
+              </thead>
+              <tbody ng-repeat="t in transactions">
+                <td>{{t.time | date : 'short'}}</td>
+                <td>{{t.instrument}}</td>
+                <td>{{t.type}}</td>
+                <td>{{t.price}}</td>
+                <td>{{t.side}}</td>
+                <td>{{t.trailingStopLossDistance}}</td>
+                <td>{{t.units}}</td>
+                <td class="{{t.pl>=0?'text-success':'text-alert'}}"><span ng-show="t.type=='TRAILING_STOP_FILLED'||t.type=='TRADE_CLOSE'||t.type=='DAILY_INTEREST'">{{t.pl | currency}}</span></td>
+                <td class="{{t.interest>=0?'text-success':'text-alert'}}"><span ng-show="t.type=='TRAILING_STOP_FILLED'||t.type=='TRADE_CLOSE'||t.type=='DAILY_INTEREST'">{{t.interest}}</span></td>
+                <td>{{t.accountBalance | currency}}</td>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="margin-top: 5vh" ng-show="state==1">
+        <div class="large-6 columns">
+          <h4>New Order</h4>
+          <label>Instrument
+            <select ng-options="instrument.instrument as instrument.displayName for instrument in instruments | orderBy: instrument.displayName" ng-model="order.instrument" ng-change="getCurrentPrices()">
+            </select>
+          </label>
+          <label>Units
+            <input type="number" ng-model="order.units">
+          </label>
+          <label>Side
+            <select ng-model="order.side">
+              <option value="buy">buy</option>
+              <option value="sell">sell</option>
+            </select>
+          </label>Trailing Stop (Pips)
+            <input type="number" ng-model="order.trailingStop">
+          <label>
+          <button type="button" class="button expanded primary" ng-click="placeOrder()">Place Order</button>
+          <button type="button" class="button expanded alert" ng-click="state=0">Cancel</button>
+        </div>
+        <div class="large-6 columns">
+          <div class="row">
+            <h4>Currency Info</h4>
+          </div>
+          <div class="row">
+            <div class="large-4 columns">
+              <label>Bid
+                <h3 class="{{order.side=='sell'?'text-success':''}}">{{order.price.bid}}</h3>
+              </label>
+            </div>
+            <div class="large-4 columns">
+              <label>Ask
+                <h3 class="{{order.side=='buy'?'text-success':''}}">{{order.price.ask}}</h3>
+              </label>
+            </div>
+            <div class="large-4 columns">
+              <label>Stop Loss
+                <h3>{{order.stopLoss}}</h3>
+              </label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="large-6 columns">
+              <label>Total
+                <h2>{{order.cost.toFixed(4)}}</h2>
+              </label>
+            </div>
+            <div class="large-6 columns">
+              <label>Max Loss
+                <h2 class="text-alert">{{(order.trailingStop / 10).toFixed(2)}}</h2>
+              </label>
             </div>
           </div>
         </div>
