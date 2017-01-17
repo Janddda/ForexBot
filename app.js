@@ -1,6 +1,9 @@
 var express = require('express');
 var app = express();
 var path = require('path');
+var request = require('request');
+var async = require('async');
+var PythonShell = require('python-shell');
 
 /*
  * MySQL Set-up
@@ -18,6 +21,22 @@ var connection = mysql.createConnection({
  */
 
  var watchers = null;
+
+/*
+* API Set-up
+*/
+
+var domain = 'https://api-fxpractice.oanda.com';
+var access_token = '13d85815857b2114bc46b5ca2b9f415f-39f6af6d03fc815c719aac47f33e677f';
+var account_id = '4489830';
+
+var headers = { 
+    "Authorization": "Bearer "+access_token,
+};
+
+/*
+* Routes
+*/
 
 app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname + '/index.html'));
@@ -116,13 +135,40 @@ setInterval(function() {
             watchers = rows;
 
             for(var i=0; i<watchers.length; i++) {
-            	
+
             	var w = watchers[i];
-
-            	//For each watcher that we have to run through, 
-            	            
-
+            	
+            	//Map the watcher to a proper URL for candles in order to pass into the async function
+            	watchers[i].url = domain+'/v1/candles?instrument='+w.instrument+
+            					'&granularity='+w.granularity+
+            					'&count='+w.candle_count;          	            
             }
+
+            async.map(watchers, function(watcher, callback) {
+            	request(watcher.url, function(error, response, body) {
+
+            		//Get candles for the watcher
+            		var candles = JSON.parse(body);
+            		candles = candles.candles; //Discard other info
+
+            		//Trim down data to just ask prices for now, start out simple.
+            		candles = candles.map(function(c){
+            			return [c.openAsk,c.highAsk,c.lowAsk,c.closeAsk];
+            		});
+
+            		//Pass the data into our python script, GOOD LUCK
+            		PythonShell.run('/python/bot.py', {
+            			mode: 'text',
+            			args: [candles, 0]
+            		}, function(err, results) {
+        				if (err) throw err;
+        				console.log(results);
+            		});
+
+
+
+            	});  
+            });
 
         } else {
             console.log(err);

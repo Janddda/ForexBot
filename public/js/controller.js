@@ -113,16 +113,19 @@ app.controller('myCtrl', function($scope, $http) {
         }
         instruments=instruments.slice(0, -3);
 
-        $http({
-            url: domain+"/prices?instruments="+instruments,
-            method: "GET",
-            params: {
-            },
-            headers: postHeaders
-        }).then(function(response) {
-            $scope.prices = response.data.prices;
-        });
+        if(instruments.length > 0) {
 
+            $http({
+                url: domain+"/prices?instruments="+instruments,
+                method: "GET",
+                params: {
+                },
+            headers: postHeaders
+            }).then(function(response) {
+                $scope.prices = response.data.prices;
+            });
+
+        }
 
     }
 
@@ -213,9 +216,9 @@ app.controller('myCtrl', function($scope, $http) {
         }).then(function(response) {
             $scope.order.price = response.data.prices[0];
             if($scope.order.side == 'buy'){
-                $scope.order.cost = $scope.order.price.ask * $scope.order.units;
+                $scope.order.cost = ($scope.order.price.ask * $scope.order.units) * $scope.account.marginRate;
             }else{
-                $scope.order.cost = $scope.order.price.bid * $scope.order.units;
+                $scope.order.cost = ($scope.order.price.bid * $scope.order.units) * $scope.account.marginRate;
             }
             if($scope.order.side=='buy') {
                 $scope.order.stopLoss = ($scope.order.price.ask-($scope.order.trailingStop*0.001)).toFixed(4);

@@ -39,52 +39,15 @@
             <b>Margin Rate: </b> {{account.marginRate}}
         </div>    
     	</div>	
+      <hr>
       <div class="row" style="margin-top: 20px" ng-show="state==0">
-        <div class="row">
-          <div class="large-12 columns">
-            <div class="large-2 columns">
-              <h4>Live Trades</h4>
-            </div>
-            <div class="large-10 columns">
-              <button type="button" class="primary button" ng-click="newOrder()">New Order</button>
-            </div>
-            <table style="width: 100%">
-              <thead>
-                <th>Time</th>
-                <th>Instrument</th>
-                <th>Price</th>
-                <th>Live Price</th>
-                <th>Profit ($)</th>
-                <th>Side</th>
-                <th>Stop Loss (Price)</th>
-                <th>Stop Loss (Pips)</th>
-                <th>Units</th>
-                <th></th>
-                <th></th>
-              </thead>
-              <tbody ng-repeat="trade in trades">
-                <td>{{trade.time | date : 'short'}}</td>
-                <td>{{trade.instrument}}</td>
-                <td>{{trade.price}}</td>
-                <td class="{{trade.is_good==true?'text-success':'text-alert'}}">{{trade.live_price}}</td>
-                <td class="{{trade.is_good==true?'text-success':'text-alert'}}">{{trade.profit}}</td>
-                <td>{{trade.side}}</td>
-                <td>{{trade.trailingAmount}}</td>
-                <td>{{trade.trailingStop}}</td>
-                <td>{{trade.units}}</td>
-                <td><button type="button" class="button primary expanded">Edit</button></td>
-                <td><button type="button" class="button alert expanded" ng-click="closeTrade(trade)">Close</button></td>
-              </tbody>
-            </table>
-          </div>
-        </div>
         <div class="row">
           <div class="large-12 columns">
             <div class="large-2 columns">
               <h4>Watchers</h4>
             </div>
             <div class="large-10 columns">
-              <button type="button" class="primary button" ng-click="newWatcher()">New Watcher</button>
+              <button type="button" class="primary button" style="float: right;" ng-click="newWatcher()">New Watcher</button>
             </div>
             <table style="width: 100%">
               <thead>
@@ -115,37 +78,77 @@
           </div>
         </div>
       </div>
-        <div class="row">
+      <hr>
+      <div class="row">
           <div class="large-12 columns">
-            <h4>Last 50 Transactions</h4>
+            <div class="large-2 columns">
+              <h4>Live Trades</h4>
+            </div>
+            <div class="large-10 columns">
+              <button type="button" class="primary button" style="float: right;" ng-click="newOrder()">New Order</button>
+            </div>
             <table style="width: 100%">
               <thead>
                 <th>Time</th>
                 <th>Instrument</th>
-                <th>Type</th>
                 <th>Price</th>
+                <th>Live Price</th>
+                <th>Profit ($)</th>
                 <th>Side</th>
+                <th>Stop Loss (Price)</th>
                 <th>Stop Loss (Pips)</th>
                 <th>Units</th>
-                <th>Profit ($)</th>
-                <th>Interest</th>
-                <th>Account Balance</th>
+                <th></th>
+                <th></th>
               </thead>
-              <tbody ng-repeat="t in transactions">
-                <td>{{t.time | date : 'short'}}</td>
-                <td>{{t.instrument}}</td>
-                <td>{{t.type}}</td>
-                <td>{{t.price}}</td>
-                <td>{{t.side}}</td>
-                <td>{{t.trailingStopLossDistance}}</td>
-                <td>{{t.units}}</td>
-                <td class="{{t.pl>=0?'text-success':'text-alert'}}"><span ng-show="t.type=='TRAILING_STOP_FILLED'||t.type=='TRADE_CLOSE'||t.type=='DAILY_INTEREST'">{{t.pl | currency}}</span></td>
-                <td class="{{t.interest>=0?'text-success':'text-alert'}}"><span ng-show="t.type=='TRAILING_STOP_FILLED'||t.type=='TRADE_CLOSE'||t.type=='DAILY_INTEREST'">{{t.interest}}</span></td>
-                <td>{{t.accountBalance | currency}}</td>
+              <tbody ng-repeat="trade in trades">
+                <td>{{trade.time | date : 'short'}}</td>
+                <td>{{trade.instrument}}</td>
+                <td>{{trade.price}}</td>
+                <td class="{{trade.is_good==true?'text-success':'text-alert'}}">{{trade.live_price}}</td>
+                <td class="{{trade.is_good==true?'text-success':'text-alert'}}">{{trade.profit}}</td>
+                <td>{{trade.side}}</td>
+                <td class="{{trade.side=='buy'?trade.trailingAmount-trade.price>0?'text-success':'text-alert':trade.price-trade.trailingAmount>0?'text-success':'text-alert'}}">{{trade.trailingAmount}}</td>
+                <td>{{trade.trailingStop}}</td>
+                <td>{{trade.units}}</td>
+                <td><button type="button" class="button primary expanded">Edit</button></td>
+                <td><button type="button" class="button alert expanded" ng-click="closeTrade(trade)">Close</button></td>
               </tbody>
             </table>
           </div>
         </div>
+      <hr>
+      <div class="row">
+        <div class="large-12 columns">
+          <h4>Last 50 Transactions</h4>
+          <table style="width: 100%">
+            <thead>
+              <th>Time</th>
+              <th>Instrument</th>
+              <th>Type</th>
+              <th>Price</th>
+              <th>Side</th>
+              <th>Stop Loss (Pips)</th>
+              <th>Units</th>
+              <th>Profit ($)</th>
+              <th>Interest</th>
+              <th>Account Balance</th>
+            </thead>
+            <tbody ng-repeat="t in transactions">
+              <td>{{t.time | date : 'short'}}</td>
+              <td>{{t.instrument}}</td>
+              <td>{{t.type}}</td>
+              <td>{{t.price}}</td>
+              <td>{{t.side}}</td>
+              <td>{{t.trailingStopLossDistance}}</td>
+              <td>{{t.units}}</td>
+              <td class="{{t.pl>=0?'text-success':'text-alert'}}"><span ng-show="t.type=='TRAILING_STOP_FILLED'||t.type=='TRADE_CLOSE'||t.type=='DAILY_INTEREST'">{{t.pl | currency}}</span></td>
+              <td class="{{t.interest>=0?'text-success':'text-alert'}}"><span ng-show="t.type=='TRAILING_STOP_FILLED'||t.type=='TRADE_CLOSE'||t.type=='DAILY_INTEREST'">{{t.interest}}</span></td>
+              <td>{{t.accountBalance | currency}}</td>
+            </tbody>
+          </table>
+        </div>
+      </div>
       </div>
       <div class="row" style="margin-top: 5vh" ng-show="state==1">
         <div class="large-6 columns">

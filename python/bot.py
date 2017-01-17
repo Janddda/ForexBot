@@ -2,18 +2,20 @@
 import numpy as np
 import math
 import cgi, cgitb
+import sys
 
 from sklearn import tree
 
-print "Content-type: text/html\n\n"    #for showing print on HTML
+data = sys.argv;
 
-data = cgi.FieldStorage()
+print(sys.argv)
 
-inputFile = data["inputFile"].value 
-x_test = data['xTest'].value
+inputFile = data[0]
+x_test = data[1]
 
 #Data
-data = np.genfromtxt(inputFile,delimiter=";", usecols = (1,2,3,4)) #Change this to whatever file is needed and adjust usecols. Currently loads OHLC
+#data = np.genfromtxt(inputFile,delimiter=",", usecols = (0,1,2,3)) #Change this to whatever file is needed and adjust usecols and delimiter. Currently loads OHLC
+#data = inputFile
 
 #Number of candlesticks to look at per Y value
 n = 5
@@ -31,18 +33,18 @@ y_type = 3;
 clf = tree.DecisionTreeRegressor()
 
 #x_data
-x_data = np.concatenate(data[0:n])
+#x_data = np.concatenate(data[0:n])
 
-for x in range(1,len(data)-n-1):
-	x_data = np.vstack((x_data,np.concatenate(data[x:x+n])))
+#for x in range(1,len(data)-n-1):
+#	x_data = np.vstack((x_data,np.concatenate(data[x:x+n])))
 
 #y_data
-y_data = data[n:len(data)-1,[y_type]]
-y_data = np.ravel(y_data)
+#y_data = data[n:len(data)-1,[y_type]]
+#y_data = np.ravel(y_data)
 
 #train on input data
-clf.fit(x_data,y_data)
+#clf.fit(x_data,y_data)
 
 #make a prediction based on the input test
-print clf.predict(x_test)
+#print(clf.predict(x_test))
 
