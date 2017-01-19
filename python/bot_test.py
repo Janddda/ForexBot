@@ -54,7 +54,8 @@ for x in range(1,len(data)-n-1):
 	x_data = np.vstack((x_data,np.concatenate(data[x:x+n])))
 
 #y_data
-y_data = data[n:len(data)-1,[y_type]]
+y_data = data[n:len(data)-1]
+y_data = [item[y_type] for item in y_data]
 y_data = np.ravel(y_data)
 
 #find out if all of our data is correct.

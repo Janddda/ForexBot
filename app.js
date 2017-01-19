@@ -128,7 +128,8 @@ setInterval(function() {
 						    "WHEN run_unit = 'HOUR' THEN last_updated < NOW() - INTERVAL run_interval HOUR " +
 							"WHEN run_unit = 'DAY' THEN last_updated < NOW() - INTERVAL run_interval DAY " +
 						    "WHEN run_unit = 'WEEK' THEN last_updated < NOW() - INTERVAL run_interval WEEK " +
-						    "WHEN run_unit = 'MONTH' THEN last_updated < NOW() - INTERVAL run_interval MONTH END", function(err, rows, fields) {
+						    "WHEN run_unit = 'MONTH' THEN last_updated < NOW() - INTERVAL run_interval MONTH END " +
+					    "AND active = 1", function(err, rows, fields) {
 
         if (err == null) {
 
@@ -157,13 +158,27 @@ setInterval(function() {
             		});
 
             		//Pass the data into our python script, GOOD LUCK
-            		PythonShell.run('/python/bot.py', {
-            			mode: 'text',
-            			args: [candles, 0]
+
+            		var pyshell = new PythonShell('/python/bot.py', { mode: 'json' });
+
+            		pyshell.send(candles);
+            		pyshell.send(watcher.score_threshold);
+
+            		pyshell.on('message', function(message) {
+            			console.log(message);
+            		});
+
+            		pyshell.end(function(err) {
+            			if (err) throw err;
+            		});
+
+            		/*PythonShell.run('/python/bot.py', {
+            			mode: 'json',
+            			args: [JSON.stringify(candles), watcher.score_threshold]
             		}, function(err, results) {
         				if (err) throw err;
         				console.log(results);
-            		});
+            		});*/
 
 
 
@@ -176,7 +191,7 @@ setInterval(function() {
 
     });
 
-}, 10000);
+}, 3000);
 
 app.use(express.static('public'));
 
