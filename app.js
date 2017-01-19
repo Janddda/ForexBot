@@ -172,16 +172,6 @@ setInterval(function() {
             			if (err) throw err;
             		});
 
-            		/*PythonShell.run('/python/bot.py', {
-            			mode: 'json',
-            			args: [JSON.stringify(candles), watcher.score_threshold]
-            		}, function(err, results) {
-        				if (err) throw err;
-        				console.log(results);
-            		});*/
-
-
-
             	});  
             });
 
