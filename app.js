@@ -1,9 +1,12 @@
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
 var path = require('path');
 var request = require('request');
 var async = require('async');
 var PythonShell = require('python-shell');
+
+app.use(bodyParser.json());
 
 /*
  * MySQL Set-up
@@ -40,6 +43,10 @@ var headers = {
 
 app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname + '/index.html'));
+});
+
+app.get('/learn', function(req, res) {
+  res.sendFile(path.join(__dirname + '/learning.html'));
 });
 
 app.get('/watchers', function(req, res) {
@@ -93,6 +100,53 @@ app.post('/save/watcher', function(req, res) {
             res.write(JSON.stringify({ success: false }));
             res.end();
         }
+    });
+
+});
+
+app.post('/test', function(req, res) {
+
+    var url = domain+'/v1/candles?instrument='+req.body.instrument+
+                                '&granularity='+req.body.granularity+
+                                '&count='+req.body.candle_count;
+
+    request(url, function(err, response, body) {
+
+        if (err == null) {
+
+            //Get candles for the watcher
+            var candles = JSON.parse(body);
+            candles = candles.candles; //Discard other info
+
+            //Trim down data to just ask prices for now, start out simple.
+            candles = candles.map(function(c){
+                return [c.openAsk,c.highAsk,c.lowAsk,c.closeAsk];
+            });
+
+            var pyshell = new PythonShell('/python/bot_test.py', { mode: 'json' });
+
+            pyshell.send(candles);
+            pyshell.send(parseFloat(req.body.train_percent));
+            pyshell.send(parseInt(req.body.n));
+            pyshell.send(parseInt(req.body.y_value));
+
+            pyshell.on('message', function(message) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.write(JSON.stringify({ message: message }));
+                res.end();
+            });
+
+            pyshell.end(function(err) {
+                if (err) throw err;
+            });
+
+        } else {
+            console.log(err);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.write(JSON.stringify({ success: false }));
+            res.end();
+        }
+
     });
 
 });
@@ -165,7 +219,12 @@ setInterval(function() {
             		pyshell.send(watcher.score_threshold);
 
             		pyshell.on('message', function(message) {
-            			console.log(message);
+
+                        //Do something with the scores here
+            			if(message!=0){ // Threshold has been met
+                            
+                        }
+
             		});
 
             		pyshell.end(function(err) {
@@ -181,7 +240,7 @@ setInterval(function() {
 
     });
 
-}, 3000);
+}, 10000);
 
 app.use(express.static('public'));
 

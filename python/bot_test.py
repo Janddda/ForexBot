@@ -1,24 +1,31 @@
 #Imports
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+import json
 import math
 
-from sklearn import svm
-from sklearn import tree
-from sklearn import neural_network
 from sklearn import linear_model
+
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
 
-#Data
-data = np.genfromtxt(r"C:\Users\Justin\Downloads\HISTDATA_COM_ASCII_EURUSD_M12016\DAT_ASCII_EURUSD_M1_2016.csv",delimiter=";", usecols = (1,2,3,4), max_rows=10000) #Change this to whatever file is needed and adjust usecols. Currently loads OHLC
+from sklearn import preprocessing
+
+lines = []
+
+for line in sys.stdin:
+	lines.append(line)
+
+inputFile = lines[0]
+data = json.loads(inputFile)
 
 #Train/Test ratios
-train_percent = .7
+train_percent = float(lines[1])
 
 #Number of candlesticks to look at per Y value
-n = 5
+n = int(lines[2])
 
 #Possible Y values (note: these may change depending on the data loaded above)
 OPEN = 0;
@@ -27,23 +34,29 @@ LOW = 2;
 CLOSE = 3;
 
 #Selected Y value
-y_type = 3;
+y_type = int(lines[3])
+
+
+#Machine Learning Algorithms (for now we are not passing in any parameters)
+names = ["SGD Regressor", "Bayesian Ridge"]
 
 #Param grids for Learning Algorithms
 
-param_grid = [[
+param_grid = [
+[
 	{'loss': ['squared_loss', 'huber'],
-	 'penalty': ['none', 'l2', 'l1', 'elasticnet'],
-	 'learning_rate': ['constant', 'optimal', 'invscaling']}
+	 'penalty': ['none', 'l1', 'elasticnet'],
+	 'learning_rate': ['constant']}
 ],
 [
-	{'max_features': ['auto', 'sqrt', 'log2']}
-]]
+	{'n_iter': [3, 4, 5, 10, 15],
+	 'compute_score': [0]}
+]
+]
 
-#Machine Learning Algorithms (for now we are not passing in any parameters)
 clf = [
-linear_model.SGDRegressor(penalty='none',learning_rate='constant'),
-tree.DecisionTreeRegressor()
+linear_model.SGDRegressor(),
+linear_model.BayesianRidge()
 ]
 score = []
 
@@ -52,6 +65,9 @@ x_data = np.concatenate(data[0:n])
 
 for x in range(1,len(data)-n-1):
 	x_data = np.vstack((x_data,np.concatenate(data[x:x+n])))
+
+#x_data = preprocessing.minmax_scale(x_data)
+x_data = preprocessing.scale(x_data)
 
 #y_data
 y_data = data[n:len(data)-1]
@@ -69,13 +85,15 @@ x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, train_size=t
 
 colors = ['red', 'green', 'blue']
 
+response = {}
+response['classifiers'] = []
+
 for x in range(0,len(clf)):
 	y_eval = clf[x].fit(x_train,y_train)
-	score.append(cross_val_score(clf[x], x_data, y_data, cv=10))
-	#print(GridSearchCV(clf[x], param_grid[x], cv=10).fit(x_data,y_data).best_params_)
-	print(np.average(score[x]))
-	predictions = clf[x].predict(x_test)
-	plt.scatter(range(0,len(y_test)),predictions-y_test, label=clf[x], color=colors[x], alpha=.5)
+	gs = GridSearchCV(clf[x], param_grid[x], cv=10).fit(x_data,y_data)
+	best_params = gs.best_params_
+	score = gs.best_score_
+	predictions = clf[x].predict(x_data).tolist()
+	response['classifiers'].append({'name': names[x], 'score': np.average(score), 'best_params': best_params, 'predictions': predictions, 'answers': y_data.tolist()})
 
-plt.legend()
-plt.show()
+print(json.dumps(response))

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html ng-app="myApp" ng-controller="myCtrl">
+  <head>
+    <meta charset="utf-8" />
+    <title>F Test</title>
+    <link rel="stylesheet" type="text/css" href="css/vendor/foundation.min.css">
+  </head>
+  <body ng-cloak>
+  	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script src="http://canvasjs.com/assets/script/canvasjs.min.js"></script>
+  	<script src="js/vendor/jquery.js"></script>
+  	<script src="js/vendor/foundation.min.js"></script>
+  	<script src="js/learning.controller.js"></script>
+    <style>
+      h3.text-success {
+        color: green;
+      }
+      td.text-success {
+        color: green;
+      }
+      td.text-alert {
+        color: red;
+      }
+    </style>
+    <div ng-show="loading&&state!=1" style="width: 100%; height: 100%;">
+      <div style="position: absolute; left: 45%; top: 45%; font-size: 2em;">
+        Loading...
+      </div>
+    </div>
+    <div ng-show="state==0&&!loading">
+    	<div class="row">
+        <h1>Settings</h1>
+        <label>Instrument
+          <select ng-options="instrument.instrument as instrument.displayName for instrument in instruments | orderBy: instrument.displayName" ng-model="selectedInstrument">
+          </select>
+        </label>
+        <label>Granularity
+          <select ng-options="g.value as g.description for g in granularities" ng-model="selectedGranularity">
+          </select>
+        </label>
+        <label>Candle Count
+          <input type="number" ng-model="candleCount">
+        </label>
+        <label>Train Percentage
+          <input type="number" ng-model="trainPercent">
+        </label>
+        <label>Number of previous candles
+          <input type="number" ng-model="n">
+        </label>
+        <label>Seek Value
+          <select ng-model="yValue">
+            <option value=0>Open</option>
+            <option value=1>High</option>
+            <option value=2>Low</option>
+            <option value=3 selected>Close</option>
+          </select>
+        </label>
+        <button type="button" class="button expanded primary" ng-click="test()">Test Settings</button>
+    	</div>	
+    </div>
+    <div ng-show="state==1">
+      <div class="row">
+        <div class="large-12 columns">
+          <h1>Classifier Results</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="large-12 columns">
+          <h4>Settings</h4>
+          Instrument: {{selectedInstrument}}<br>
+          Granularity: {{selectedGranularity}}<br>
+          Candle Count: {{candleCount}}<br>
+          Train Percentage: {{trainPercent}}<br>
+          Num Previous Candles: {{n}}<br>
+          Seek Value: {{seekValues[yValue]}}<br>
+        </div>
+      </div>
+      <br>
+      <div class="row">
+        <div class="large-12 columns">
+          <table>
+            <tbody ng-repeat="clf in classifiers | orderBy:'score':true">
+              <tr>
+                <td colspan="2"><h4 style="padding-top: 10px;">{{clf.name}}</h4></td>
+              </tr>
+              <tr>
+                <td><b>Score</b></td>
+                <td>{{clf.score.toFixed(4)}}</td>
+              </tr>
+              <tr>
+                <td><b>Best Params</b></td>
+                <td>
+                  <table>
+                    <tbody>
+                      <tr ng-repeat="(key,value) in clf.best_params">
+                        <td>{{key}}:</td>
+                        <td>{{value}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>Answer: {{clf.answers[0]}}</td>
+                <td>Guess: {{clf.predictions[0].toFixed(5)}}</td>
+              </tr>
+              <tr>
+                <td>Difference</td>
+                <td>{{(clf.answers[0]-clf.predictions[0].toFixed(5)).toFixed(5)}}</td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <canvas id="{{clf.name}}Chart" width="400" height="200"></canvas>
+                </td>
+              </tr>
+            </tbody>
+        </table>
+        </div>
+      </div>
+      <div class="row">
+        <div class="large-12 columns">
+          <button type="button" class="button expanded success" ng-click="test()" ng-hide="loading">Use Same Settings</button>
+          <button type="button" class="button expanded primary" ng-click="state=0">Back</button>
+        </div>
+      </div>
+    </div>
+    <script>
+    	$(document).foundation();
+    </script>
+  </body>
+</html>

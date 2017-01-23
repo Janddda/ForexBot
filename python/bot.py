@@ -1,11 +1,9 @@
 #Imports
 import numpy as np
-import math
-import cgi, cgitb
 import sys
 import json
+import math
 
-from sklearn import tree
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
@@ -22,7 +20,7 @@ score_threshold = lines[1]
 data = json.loads(inputFile)
 
 #Number of candlesticks to look at per Y value
-n = 5
+n = 50
 
 #Possible Y values (note: these may change depending on the data loaded above)
 OPEN = 0;
@@ -31,10 +29,10 @@ LOW = 2;
 CLOSE = 3;
 
 #Selected Y value
-y_type = 3;
+y_type = 1;
 
 #Selected CLF
-clf = tree.DecisionTreeRegressor()
+clf = linear_model.BayesianRidge(n_iter=3,compute_score=0)
 
 #x_data
 x_data = np.concatenate(data[0:n])
@@ -64,4 +62,4 @@ guess = clf.predict(x_guess.reshape(1, -1))
 if(float(score) > float(score_threshold)):
 	print(guess[0])
 else:
-	print(score)
+	print(0)
