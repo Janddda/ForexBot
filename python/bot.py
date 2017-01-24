@@ -37,15 +37,15 @@ y_type = 1;
 clf = linear_model.BayesianRidge(n_iter=3,compute_score=0)
 
 #x_data
-x_data = np.concatenate(data[0:n])
+x_data = np.concatenate(data[0:n-1])
 
-for x in range(1,len(data)-n):
-	x_data = np.vstack((x_data,np.concatenate(data[x:x+n])))
+for x in range(1,len(data)-n-1):
+	x_data = np.vstack((x_data,np.concatenate(data[x:x+(n-1)])))
 
 x_data = preprocessing.scale(x_data)
 
 #y_data
-y_data = data[n:len(data)]
+y_data = data[n:len(data)-1]
 y_data = [item[y_type] for item in y_data]
 y_data = np.ravel(y_data)
 

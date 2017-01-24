@@ -9,6 +9,7 @@ app.controller('myCtrl', function($scope, $http) {
 	var account_id = '4489830';
 
     var postHeaders = {
+        "Authorization": "Bearer "+access_token,
         "Content-Type": "text/json" 
     };
 
@@ -95,6 +96,9 @@ app.controller('myCtrl', function($scope, $http) {
             setTimeout(function(){
                 for(var i=0; i<$scope.classifiers.length; i++){
                     var c = $scope.classifiers[i];
+                    c.predictions = c.predictions.map(function(x){
+                        return x.toFixed(5);
+                    });
                     var ctx = document.getElementById(c.name+"Chart");
                     if(c.predictions.length > 0 && c.answers.length > 0){
                         var ch = new Chart(ctx, {
@@ -108,7 +112,7 @@ app.controller('myCtrl', function($scope, $http) {
                                     fill: false,
                                     borderColor: '#e74c3c',
                                     borderWidth: 1,
-                                    pointRadius: 0
+                                    pointRadius: 1
                                 },
                                 {
                                     label: 'Answers',
@@ -117,7 +121,7 @@ app.controller('myCtrl', function($scope, $http) {
                                     fill: false,
                                     borderColor: '#3498db',
                                     borderWidth: 1,
-                                    pointRadius: 0
+                                    pointRadius: 1
                                 }]
                             },
                             options: {
@@ -153,7 +157,7 @@ app.controller('myCtrl', function($scope, $http) {
     };
 
     $scope.prediction = function(clf) {
-        return (clf.answers[clf.answers.length-1]-clf.predictions[clf.predictions.length-1].toFixed(5)).toFixed(5);
+        return (clf.answers[clf.answers.length-1]-clf.predictions[clf.predictions.length-2]).toFixed(5);
     };
 
     /* Constructor */

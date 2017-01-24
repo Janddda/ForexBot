@@ -120,13 +120,13 @@ app.post('/test', function(req, res) {
             candles = candles.candles; //Discard other info
 
             //Filter candle which is not completed if it exists
-            		candles = candles.filter(function(c){
-            			return c.complete == true;
-            		});
+    		candles = candles.filter(function(c){
+    			return c.complete == true;
+    		});
 
             //Trim down data to just ask prices for now, start out simple.
             candles = candles.map(function(c){
-                return [c.openBid,c.highBid,c.lowBid,c.closeBid];
+                return [c.openAsk,c.highAsk,c.lowAsk,c.closeAsk];
             });
 
             var pyshell = new PythonShell('/python/bot_test.py', { mode: 'json' });
