@@ -85,6 +85,7 @@ app.post('/save/watcher', function(req, res) {
 				"', active="+watcher.active+
 				", score_threshold="+watcher.score_threshold+
 				", candle_count="+watcher.candle_count+
+				", last_predicted_price="+watcher.last_predicted_price+
 				" WHERE watcher_id="+watcher.id;
 
     }
@@ -118,9 +119,14 @@ app.post('/test', function(req, res) {
             var candles = JSON.parse(body);
             candles = candles.candles; //Discard other info
 
+            //Filter candle which is not completed if it exists
+            		candles = candles.filter(function(c){
+            			return c.complete == true;
+            		});
+
             //Trim down data to just ask prices for now, start out simple.
             candles = candles.map(function(c){
-                return [c.openAsk,c.highAsk,c.lowAsk,c.closeAsk];
+                return [c.openBid,c.highBid,c.lowBid,c.closeBid];
             });
 
             var pyshell = new PythonShell('/python/bot_test.py', { mode: 'json' });
@@ -206,13 +212,17 @@ setInterval(function() {
             		var candles = JSON.parse(body);
             		candles = candles.candles; //Discard other info
 
-            		//Trim down data to just ask prices for now, start out simple.
-            		candles = candles.map(function(c){
-            			return [c.openAsk,c.highAsk,c.lowAsk,c.closeAsk];
+            		//Filter candle which is not completed if it exists
+            		candles = candles.filter(function(c){
+            			return c.complete == true;
             		});
 
-            		//Pass the data into our python script, GOOD LUCK
+            		//Trim down data to just bid prices for now, start out simple.
+            		candles = candles.map(function(c){
+            			return [c.openBid,c.highBid,c.lowBid,c.closeBid];
+            		});
 
+            		//Pass the data into our python script
             		var pyshell = new PythonShell('/python/bot.py', { mode: 'json' });
 
             		pyshell.send(candles);
@@ -222,6 +232,21 @@ setInterval(function() {
 
                         //Do something with the scores here
             			if(message!=0){ // Threshold has been met
+
+            				watcher.last_predicted_price = message;
+
+            				query = "UPDATE watchers "+
+									"SET last_updated=NOW()"+
+									", last_predicted_price="+watcher.last_predicted_price.toFixed(5)+
+									" WHERE id="+watcher.id;
+
+							connection.query(query, function(err, rows, fields) {
+						        if (err == null) {
+
+						        } else {
+						            console.log(err);
+						        }
+    						});
                             
                         }
 

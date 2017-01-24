@@ -51,9 +51,9 @@
         <label>Seek Value
           <select ng-model="yValue">
             <option value=0>Open</option>
-            <option value=1>High</option>
+            <option value=1 selected>High</option>
             <option value=2>Low</option>
-            <option value=3 selected>Close</option>
+            <option value=3>Close</option>
           </select>
         </label>
         <button type="button" class="button expanded primary" ng-click="test()">Test Settings</button>
@@ -102,12 +102,12 @@
                 </td>
               </tr>
               <tr>
-                <td>Answer: {{clf.answers[0]}}</td>
-                <td>Guess: {{clf.predictions[0].toFixed(5)}}</td>
+                <td>Answer: {{clf.answers[clf.answers.length-1]}}</td>
+                <td>Guess: {{clf.predictions[clf.predictions.length-1].toFixed(5)}}</td>
               </tr>
               <tr>
                 <td>Difference</td>
-                <td>{{(clf.answers[0]-clf.predictions[0].toFixed(5)).toFixed(5)}}</td>
+                <td>{{prediction(clf)}}</td>
               </tr>
               <tr>
                 <td colspan="2">

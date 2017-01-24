@@ -8,6 +8,8 @@ from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 
+from sklearn import preprocessing
+
 lines = []
 
 for line in sys.stdin:
@@ -37,16 +39,15 @@ clf = linear_model.BayesianRidge(n_iter=3,compute_score=0)
 #x_data
 x_data = np.concatenate(data[0:n])
 
-for x in range(1,len(data)-n-1):
+for x in range(1,len(data)-n):
 	x_data = np.vstack((x_data,np.concatenate(data[x:x+n])))
 
+x_data = preprocessing.scale(x_data)
+
 #y_data
-y_data = data[n:len(data)-1]
+y_data = data[n:len(data)]
 y_data = [item[y_type] for item in y_data]
 y_data = np.ravel(y_data)
-
-#split training and test data
-x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, train_size=.7)
 
 #train on input data
 clf.fit(x_data,y_data)

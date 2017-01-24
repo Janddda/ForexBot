@@ -291,16 +291,20 @@ app.controller('myCtrl', function($scope, $http) {
 
     /* Timers */
     window.setInterval(function(){
+        getWatchers();
+    },5000);
+
+    window.setInterval(function(){
         getPrices();
         updateTrades();
-    },5000);
+    },1000);
 
     window.setInterval(function(){
         getPrices();
         getTrades();
         updateTrades();
         getTransactions();
-    },120000);
+    },1000*60*3);
 
     window.setInterval(function(){
         if($scope.state==1){

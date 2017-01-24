@@ -43,14 +43,14 @@ app.controller('myCtrl', function($scope, $http) {
     	{ value: "W", description: "1 week" },
     	{ value: "M", description: "1 month" }
     ];
-    $scope.selectedGranularity = "H1";
+    $scope.selectedGranularity = "M1";
 
     $scope.seekValues = ["Open","High","Low","Close"];
 
     $scope.candleCount = 5000;
     $scope.trainPercent = 0.7;
-    $scope.yValue = "3";
-    $scope.n = 5;
+    $scope.yValue = "1";
+    $scope.n = 50;
 
     $scope.loading = false;
 
@@ -150,6 +150,10 @@ app.controller('myCtrl', function($scope, $http) {
 
     $scope.test = function() {
         test();
+    };
+
+    $scope.prediction = function(clf) {
+        return (clf.answers[clf.answers.length-1]-clf.predictions[clf.predictions.length-1].toFixed(5)).toFixed(5);
     };
 
     /* Constructor */

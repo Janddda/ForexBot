@@ -38,24 +38,18 @@ y_type = int(lines[3])
 
 
 #Machine Learning Algorithms (for now we are not passing in any parameters)
-names = ["SGD Regressor", "Bayesian Ridge"]
+names = ["Bayesian Ridge"]
 
 #Param grids for Learning Algorithms
 
 param_grid = [
 [
-	{'loss': ['squared_loss', 'huber'],
-	 'penalty': ['none', 'l1', 'elasticnet'],
-	 'learning_rate': ['constant']}
-],
-[
-	{'n_iter': [3, 4, 5, 10, 15],
+	{'n_iter': [3],
 	 'compute_score': [0]}
 ]
 ]
 
 clf = [
-linear_model.SGDRegressor(),
 linear_model.BayesianRidge()
 ]
 score = []
@@ -63,14 +57,14 @@ score = []
 #x_data
 x_data = np.concatenate(data[0:n])
 
-for x in range(1,len(data)-n-1):
+for x in range(1,len(data)-n):
 	x_data = np.vstack((x_data,np.concatenate(data[x:x+n])))
 
 #x_data = preprocessing.minmax_scale(x_data)
 x_data = preprocessing.scale(x_data)
 
 #y_data
-y_data = data[n:len(data)-1]
+y_data = data[n:len(data)]
 y_data = [item[y_type] for item in y_data]
 y_data = np.ravel(y_data)
 
@@ -94,6 +88,6 @@ for x in range(0,len(clf)):
 	best_params = gs.best_params_
 	score = gs.best_score_
 	predictions = clf[x].predict(x_data).tolist()
-	response['classifiers'].append({'name': names[x], 'score': np.average(score), 'best_params': best_params, 'predictions': predictions, 'answers': y_data.tolist()})
+	response['classifiers'].append({'name': names[x], 'score': np.average(score), 'best_params': best_params, 'predictions': predictions[-20:], 'answers': y_data[-20:].tolist()})
 
 print(json.dumps(response))
