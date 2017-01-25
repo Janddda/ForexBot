@@ -134,7 +134,6 @@ app.post('/test', function(req, res) {
             pyshell.send(candles);
             pyshell.send(parseFloat(req.body.train_percent));
             pyshell.send(parseInt(req.body.n));
-            pyshell.send(parseInt(req.body.y_value));
 
             pyshell.on('message', function(message) {
                 res.writeHead(200, { 'Content-Type': 'application/json' });

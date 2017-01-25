@@ -48,14 +48,6 @@
         <label>Number of previous candles
           <input type="number" ng-model="n">
         </label>
-        <label>Seek Value
-          <select ng-model="yValue">
-            <option value=0>Open</option>
-            <option value=1 selected>High</option>
-            <option value=2>Low</option>
-            <option value=3>Close</option>
-          </select>
-        </label>
         <button type="button" class="button expanded primary" ng-click="test()">Test Settings</button>
     	</div>	
     </div>
@@ -73,7 +65,6 @@
           Candle Count: {{candleCount}}<br>
           Train Percentage: {{trainPercent}}<br>
           Num Previous Candles: {{n}}<br>
-          Seek Value: {{seekValues[yValue]}}<br>
         </div>
       </div>
       <br>
@@ -83,31 +74,6 @@
             <tbody ng-repeat="clf in classifiers | orderBy:'score':true">
               <tr>
                 <td colspan="2"><h4 style="padding-top: 10px;">{{clf.name}}</h4></td>
-              </tr>
-              <tr>
-                <td><b>Score</b></td>
-                <td>{{clf.score.toFixed(4)}}</td>
-              </tr>
-              <tr>
-                <td><b>Best Params</b></td>
-                <td>
-                  <table>
-                    <tbody>
-                      <tr ng-repeat="(key,value) in clf.best_params">
-                        <td>{{key}}:</td>
-                        <td>{{value}}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td>Answer: {{clf.answers[clf.answers.length-1]}}</td>
-                <td>Guess: {{clf.predictions[clf.predictions.length-2].toFixed(5)}}</td>
-              </tr>
-              <tr>
-                <td>Difference</td>
-                <td>{{prediction(clf)}}</td>
               </tr>
               <tr>
                 <td colspan="2">

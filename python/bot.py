@@ -54,7 +54,6 @@ clf.fit(x_data[:-1],y_data)
 
 #score data
 score = np.average(cross_val_score(clf, x_data, y_data, cv=10))
-#print(score)
 
 #make predictionss
 x_guess = x_data[-1]

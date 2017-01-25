@@ -46,12 +46,9 @@ app.controller('myCtrl', function($scope, $http) {
     ];
     $scope.selectedGranularity = "M1";
 
-    $scope.seekValues = ["Open","High","Low","Close"];
-
-    $scope.candleCount = 5000;
+    $scope.candleCount = 1000;
     $scope.trainPercent = 0.7;
-    $scope.yValue = "1";
-    $scope.n = 50;
+    $scope.n = 5;
 
     $scope.loading = false;
 
@@ -83,8 +80,7 @@ app.controller('myCtrl', function($scope, $http) {
                 granularity:$scope.selectedGranularity,
                 candle_count:$scope.candleCount,
                 train_percent:$scope.trainPercent,
-                n:$scope.n,
-                y_value:$scope.yValue
+                n:$scope.n
             }
         }).then(function(response) {
             $scope.classifiers = response.data.message.classifiers.map(function(x){
@@ -93,59 +89,124 @@ app.controller('myCtrl', function($scope, $http) {
             });
             $scope.state = 1;
             $scope.loading = false;
-            setTimeout(function(){
-                for(var i=0; i<$scope.classifiers.length; i++){
-                    var c = $scope.classifiers[i];
-                    c.predictions = c.predictions.map(function(x){
-                        return x.toFixed(5);
-                    });
-                    var ctx = document.getElementById(c.name+"Chart");
-                    if(c.predictions.length > 0 && c.answers.length > 0){
-                        var ch = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: new Array(c.predictions.length),
-                                datasets: [{
-                                    label: 'Predictions',
-                                    data: c.predictions,
-                                    lineTension: 0,
-                                    fill: false,
-                                    borderColor: '#e74c3c',
-                                    borderWidth: 1,
-                                    pointRadius: 1
-                                },
-                                {
-                                    label: 'Answers',
-                                    data: c.answers,
-                                    lineTension: 0, 
-                                    fill: false,
-                                    borderColor: '#3498db',
-                                    borderWidth: 1,
-                                    pointRadius: 1
-                                }]
-                            },
-                            options: {
-                                scales: {
-                                    yAxes: [{
-                                        display: true,
-                                        ticks: {
-                                            beginAtZero:false
-                                        }
-                                    }],
-                                    xAxes: [{
-                                        display: true,
-                                        position: 'bottom',
-                                        ticks: {
-                                            min: 0,
-                                            max: c.answers.length,
-                                            stepSize: 1
-                                        }
-                                    }]
-                                }
-                            }
-                        });
-                    }        
+
+            var avg = {
+                name: 'Average Prediction',
+                answers: $scope.classifiers[0].answers,
+                predictions: [],
+                score: 1,
+                best_params: []
+            };
+      
+            for(var i=0; i<$scope.classifiers[0].predictions.length; i++){
+                avg.predictions.push([]);
+                for(var p=0; p<$scope.classifiers[0].predictions[i].length; p++){
+                    a = 0;
+                    for(var j=0; j<$scope.classifiers.length; j++){
+                        a+=$scope.classifiers[j].predictions[i][p];
+                    }
+                    a = a/$scope.classifiers.length;
+                    avg.predictions[i].push(a);
                 }
+            }
+
+            $scope.classifiers.push(avg);
+
+            setTimeout(function(){
+
+                for(var i=0; i<$scope.classifiers.length; i++){
+
+                    var c = $scope.classifiers[i];
+
+                    for(var j=0; j<c.predictions.length; j++){
+                        c.predictions[j] = c.predictions[j].map(function(x){
+                        return x.toFixed(5);
+                        });
+                    }
+                    
+                    var ctx = document.getElementById(c.name+"Chart");
+
+                    var ch = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: new Array(c.predictions[0].length),
+                            datasets: [{
+                                label: 'High Predictions',
+                                data: c.predictions[0],
+                                lineTension: 0,
+                                fill: false,
+                                borderColor: '#2ecc71',
+                                borderWidth: 1,
+                                pointRadius: 1
+                            },
+                            {
+                                label: 'High Answers',
+                                data: c.answers[0],
+                                lineTension: 0, 
+                                fill: false,
+                                borderColor: '#27ae60',
+                                borderWidth: 2,
+                                pointRadius: 1
+                            },
+                            {
+                                label: 'Low Predictions',
+                                data: c.predictions[1],
+                                lineTension: 0,
+                                fill: false,
+                                borderColor: '#e74c3c',
+                                borderWidth: 1,
+                                pointRadius: 1
+                            },
+                            {
+                                label: 'Low Answers',
+                                data: c.answers[1],
+                                lineTension: 0, 
+                                fill: false,
+                                borderColor: '#c0392b',
+                                borderWidth: 2,
+                                pointRadius: 1
+                            },
+                            {
+                                label: 'Close Predictions',
+                                data: c.predictions[2],
+                                lineTension: 0,
+                                fill: false,
+                                borderColor: '#3498db',
+                                borderWidth: 1,
+                                pointRadius: 1
+                            },
+                            {
+                                label: 'Close Answers',
+                                data: c.answers[2],
+                                lineTension: 0, 
+                                fill: false,
+                                borderColor: '#2980b9',
+                                borderWidth: 2,
+                                pointRadius: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    display: true,
+                                    ticks: {
+                                        beginAtZero:false
+                                    }
+                                }],
+                                xAxes: [{
+                                    display: true,
+                                    position: 'bottom',
+                                    ticks: {
+                                        min: 0,
+                                        max: c.answers[0].length,
+                                        stepSize: 1
+                                    }
+                                }]
+                            }
+                        }
+                    });
+
+                }        
             },1000);
         });
     }
