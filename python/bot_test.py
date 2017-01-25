@@ -41,7 +41,7 @@ y_type = int(lines[3])
 
 
 #Machine Learning Algorithms (for now we are not passing in any parameters)
-names = ["Bayesian Ridge", "K Neighbors Regressor", "NuSVR", "MLP Regressor"]
+names = ["Bayesian Ridge", "K Neighbors Regressor", "NuSVR"]
 
 #Param grids for Learning Algorithms
 
@@ -55,28 +55,22 @@ param_grid = [
 ],
 [
 	{'kernel': ['linear']}
-],
-[
-	{'activation': ['relu'],
-	 'solver': ['adam']}
 ]
 ]
 
 clf = [
 linear_model.BayesianRidge(n_iter=3),
 neighbors.KNeighborsRegressor(weights='distance'),
-svm.NuSVR(kernel='linear'),
-neural_network.MLPRegressor(hidden_layer_sizes=(10))
+svm.NuSVR(kernel='linear')
 ]
 score = []
 
 #x_data
 x_data = np.concatenate(data[0:n])
 
-for x in range(1,(len(data)-n)):
+for x in range(1,(len(data)-n)+1):
 	x_data = np.vstack((x_data,np.concatenate(data[x:x+n])))
 
-#x_data = preprocessing.minmax_scale(x_data)
 x_data = preprocessing.scale(x_data)
 
 #y_data
@@ -85,19 +79,17 @@ y_data = [item[y_type] for item in y_data]
 y_data = np.ravel(y_data)
 
 #split training and test data
-x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, train_size=train_percent)
+x_train, x_test, y_train, y_test = train_test_split(x_data[:-1], y_data, train_size=train_percent)
 
 response = {}
 response['classifiers'] = []
 
 for x in range(0,len(clf)):
 	y_eval = clf[x].fit(x_train,y_train)
-	gs = GridSearchCV(clf[x], param_grid[x], cv=5, scoring='r2').fit(x_data,y_data)
+	gs = GridSearchCV(clf[x], param_grid[x], cv=5, scoring='r2').fit(x_train,y_train)
 	best_params = gs.best_params_
 	score = gs.best_score_
-	x_final = np.vstack((x_data,np.concatenate(data[len(data)-n:len(data)])))
-	x_final = preprocessing.scale(x_final)
-	predictions = clf[x].predict(x_final).tolist()
-	response['classifiers'].append({'y_length': len(y_data), 'name': names[x], 'score': np.average(score), 'best_params': best_params, 'predictions': predictions[-21:], 'answers': y_data[-20:].tolist()})
+	predictions = clf[x].predict(x_data).tolist()
+	response['classifiers'].append({'name': names[x], 'score': score, 'best_params': best_params, 'predictions': predictions[-21:], 'answers': y_data[-20:].tolist()})
 
 print(json.dumps(response))

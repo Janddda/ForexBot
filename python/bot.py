@@ -37,20 +37,20 @@ y_type = 1;
 clf = linear_model.BayesianRidge(n_iter=3,compute_score=0)
 
 #x_data
-x_data = np.concatenate(data[0:n-1])
+x_data = np.concatenate(data[0:n])
 
-for x in range(1,len(data)-n-1):
-	x_data = np.vstack((x_data,np.concatenate(data[x:x+(n-1)])))
+for x in range(1,(len(data)-n)+1):
+	x_data = np.vstack((x_data,np.concatenate(data[x:x+n])))
 
 x_data = preprocessing.scale(x_data)
 
 #y_data
-y_data = data[n:len(data)-1]
+y_data = data[n:len(data)]
 y_data = [item[y_type] for item in y_data]
 y_data = np.ravel(y_data)
 
 #train on input data
-clf.fit(x_data,y_data)
+clf.fit(x_data[:-1],y_data)
 
 #score data
 score = np.average(cross_val_score(clf, x_data, y_data, cv=10))
