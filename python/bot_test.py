@@ -32,13 +32,12 @@ train_percent = float(lines[1])
 n = int(lines[2])
 
 #Machine Learning Algorithms (for now we are not passing in any parameters)
-names = ["Bayesian Ridge", "K Neighbors Regressor", "NuSVR", "Decision Tree", "AdaBoost Regressor"]
+names = ["Bayesian Ridge", "K Neighbors Regressor", "NuSVR", "AdaBoost Regressor"]
 
 clf = [
 linear_model.BayesianRidge(n_iter=3),
 neighbors.KNeighborsRegressor(weights='distance'),
 svm.NuSVR(kernel='linear'),
-tree.DecisionTreeRegressor(criterion='mae'),
 ensemble.AdaBoostRegressor(tree.DecisionTreeRegressor(),n_estimators=100)
 ]
 

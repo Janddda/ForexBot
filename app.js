@@ -109,7 +109,8 @@ app.post('/test', function(req, res) {
 
     var url = domain+'/v1/candles?instrument='+req.body.instrument+
                                 '&granularity='+req.body.granularity+
-                                '&count='+req.body.candle_count;
+                                '&count='+req.body.candle_count+
+                                '&candleFormat=midpoint';
 
     request(url, function(err, response, body) {
 
@@ -126,7 +127,7 @@ app.post('/test', function(req, res) {
 
             //Trim down data to just ask prices for now, start out simple.
             candles = candles.map(function(c){
-                return [c.openAsk,c.highAsk,c.lowAsk,c.closeAsk];
+                return [c.openMid,c.highMid,c.lowMid,c.closeMid];
             });
 
             var pyshell = new PythonShell('/python/bot_test.py', { mode: 'json' });
@@ -183,7 +184,7 @@ setInterval(function() {
 	connection.query("SELECT * " + 
 						"FROM watchers " +
 						"WHERE " + 
-							"CASE WHEN run_unit = 'MINUTE' THEN last_updated < NOW() - INTERVAL run_interval MINUTE " +
+							"CASE WHEN run_unit = 'MINUTE' THEN DATE_FORMAT(last_updated,'%Y-%m-%d %H:%i') < DATE_FORMAT(NOW() - INTERVAL run_interval MINUTE,'%Y-%m-%d %H:%i') " +
 						    "WHEN run_unit = 'HOUR' THEN last_updated < NOW() - INTERVAL run_interval HOUR " +
 							"WHEN run_unit = 'DAY' THEN last_updated < NOW() - INTERVAL run_interval DAY " +
 						    "WHEN run_unit = 'WEEK' THEN last_updated < NOW() - INTERVAL run_interval WEEK " +
@@ -201,7 +202,8 @@ setInterval(function() {
             	//Map the watcher to a proper URL for candles in order to pass into the async function
             	watchers[i].url = domain+'/v1/candles?instrument='+w.instrument+
             					'&granularity='+w.granularity+
-            					'&count='+w.candle_count;          	            
+            					'&count='+w.candle_count+
+                                '&candleFormat=midpoint';          	            
             }
 
             async.map(watchers, function(watcher, callback) {
@@ -216,44 +218,58 @@ setInterval(function() {
             			return c.complete == true;
             		});
 
+                    var last_time = candles[candles.length-1].time;
+
             		//Trim down data to just bid prices for now, start out simple.
             		candles = candles.map(function(c){
-            			return [c.openBid,c.highBid,c.lowBid,c.closeBid];
+            			return [c.openMid,c.highMid,c.lowMid,c.closeMid];
             		});
 
-            		//Pass the data into our python script
-            		var pyshell = new PythonShell('/python/bot.py', { mode: 'json' });
+                    var server_time = new Date(last_time);
+                    var watcher_time = new Date(watcher.last_updated);
 
-            		pyshell.send(candles);
-            		pyshell.send(watcher.score_threshold);
 
-            		pyshell.on('message', function(message) {
+                    if(watcher_time.getTime() < server_time.getTime()) {
 
-                        //Do something with the scores here
-            			if(message!=0){ // Threshold has been met
+                        //Pass the data into our python script
+                        var pyshell = new PythonShell('/python/bot.py', { mode: 'json' });
 
-            				watcher.last_predicted_price = message;
+                        pyshell.send(candles);
+                        pyshell.send(watcher.score_threshold);
 
-            				query = "UPDATE watchers "+
-									"SET last_updated=NOW()"+
-									", last_predicted_price="+watcher.last_predicted_price.toFixed(5)+
-									" WHERE id="+watcher.id;
+                        pyshell.on('message', function(message) {
 
-							connection.query(query, function(err, rows, fields) {
-						        if (err == null) {
+                            //Do something with the scores here
+                            if(message!=0){ // Threshold has been met
 
-						        } else {
-						            console.log(err);
-						        }
-    						});
-                            
-                        }
+                                console.log("Prediction made at:" + convertUTCDateToLocalDate(server_time).toString());
 
-            		});
+                                watcher.last_predicted_price = 0;
 
-            		pyshell.end(function(err) {
-            			if (err) throw err;
-            		});
+                                console.log("High: " + message[0]);
+
+                                query = "UPDATE watchers "+
+                                "SET last_updated='"+convertUTCDateToLocalDate(server_time).toISOString()+"'"+
+                                ", last_predicted_price="+watcher.last_predicted_price.toFixed(5)+
+                                " WHERE id="+watcher.id;
+
+                                connection.query(query, function(err, rows, fields) {
+                                    if (err == null) {
+
+                                    } else {
+                                        console.log(err);
+                                    }
+                                });
+
+                            }
+
+                        });
+
+                        pyshell.end(function(err) {
+                            if (err) throw err;
+                        });
+
+                    }
 
             	});  
             });
@@ -264,10 +280,21 @@ setInterval(function() {
 
     });
 
-}, 10000);
+}, 1000);
 
 app.use(express.static('public'));
 
 app.listen(3000, function () {
   console.log('Listening on port 3000');
 });
+
+function convertUTCDateToLocalDate(date) {
+    var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+
+    var offset = date.getTimezoneOffset() / 60;
+    var hours = date.getHours();
+
+    newDate.setHours(hours - offset);
+
+    return newDate;   
+}

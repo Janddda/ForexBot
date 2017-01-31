@@ -5,8 +5,10 @@ import json
 import math
 
 from sklearn import linear_model
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
+from sklearn import neighbors
+from sklearn import svm
+from sklearn import tree
+from sklearn import ensemble
 
 from sklearn import preprocessing
 
@@ -22,7 +24,7 @@ score_threshold = lines[1]
 data = json.loads(inputFile)
 
 #Number of candlesticks to look at per Y value
-n = 50
+n = 5
 
 #Possible Y values (note: these may change depending on the data loaded above)
 OPEN = 0;
@@ -34,7 +36,12 @@ CLOSE = 3;
 y_type = 1;
 
 #Selected CLF
-clf = linear_model.BayesianRidge(n_iter=3,compute_score=0)
+clf = [
+linear_model.BayesianRidge(n_iter=3),
+neighbors.KNeighborsRegressor(weights='distance'),
+svm.NuSVR(kernel='linear'),
+ensemble.AdaBoostRegressor(tree.DecisionTreeRegressor(),n_estimators=100)
+]
 
 #x_data
 x_data = np.concatenate(data[0:n])
@@ -46,20 +53,34 @@ x_data = preprocessing.scale(x_data)
 
 #y_data
 y_data = data[n:len(data)]
-y_data = [item[y_type] for item in y_data]
-y_data = np.ravel(y_data)
 
-#train on input data
-clf.fit(x_data[:-1],y_data)
+y_high = [item[1] for item in y_data]
+y_high = np.ravel(y_high)
 
-#score data
-score = np.average(cross_val_score(clf, x_data, y_data, cv=10))
+y_low = [item[2] for item in y_data]
+y_low = np.ravel(y_low)
 
-#make predictionss
-x_guess = x_data[-1]
-guess = clf.predict(x_guess.reshape(1, -1))
+y_close = [item[3] for item in y_data]
+y_close = np.ravel(y_close)
 
-if(float(score) > float(score_threshold)):
-	print(guess[0])
-else:
-	print(0)
+y_data = [y_high,y_low,y_close]
+
+response = {}
+classifiers = []
+
+for x in range(0,len(clf)):
+
+	predictions = []
+
+	for i in range(0, len(y_data)):
+
+		clf[x].fit(x_data[:-1],y_data[i])
+		predictions.append(clf[x].predict(x_data[-1].reshape(1, -1)))
+
+	classifiers.append(predictions)
+
+classifiers = [np.average([item[0] for item in classifiers]),
+				np.average([item[1] for item in classifiers]),
+				np.average([item[2] for item in classifiers])]
+
+print(json.dumps(classifiers))
