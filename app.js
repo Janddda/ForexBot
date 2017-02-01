@@ -242,11 +242,13 @@ setInterval(function() {
                             //Do something with the scores here
                             if(message!=0){ // Threshold has been met
 
+                                console.log("");
                                 console.log("Prediction made at:" + convertUTCDateToLocalDate(server_time).toString());
+                                console.log("High: " + message[0]);
+                                console.log("Low: " + message[1]);
+                                console.log("Close: " + message[2]);
 
                                 watcher.last_predicted_price = 0;
-
-                                console.log("High: " + message[0]);
 
                                 query = "UPDATE watchers "+
                                 "SET last_updated='"+convertUTCDateToLocalDate(server_time).toISOString()+"'"+
