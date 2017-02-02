@@ -24,6 +24,7 @@ var connection = mysql.createConnection({
  */
 
  var watchers = null;
+ var writing = false;
 
 /*
 * API Set-up
@@ -35,6 +36,11 @@ var account_id = '4489830';
 
 var headers = { 
     "Authorization": "Bearer "+access_token,
+};
+
+var postHeaders = {
+    "Authorization": "Bearer "+access_token,
+    "Content-Type": "application/x-www-form-urlencoded" 
 };
 
 /*
@@ -180,6 +186,10 @@ app.get('/scores', function(req, res) {
 
 setInterval(function() {
 
+    if(new Date().getSeconds() != 5) {
+        return;
+    }
+
 	//Get watchers that need to run
 	connection.query("SELECT * " + 
 						"FROM watchers " +
@@ -228,6 +238,9 @@ setInterval(function() {
                     var server_time = new Date(last_time);
                     var watcher_time = new Date(watcher.last_updated);
 
+                    var lastHigh = parseFloat(candles[candles.length-1][1]);
+                    var lastLow = parseFloat(candles[candles.length-1][2]);
+                    var lastClose = parseFloat(candles[candles.length-1][3]);
 
                     if(watcher_time.getTime() < server_time.getTime()) {
 
@@ -235,36 +248,87 @@ setInterval(function() {
                         var pyshell = new PythonShell('/python/bot.py', { mode: 'json' });
 
                         pyshell.send(candles);
-                        pyshell.send(watcher.score_threshold);
 
                         pyshell.on('message', function(message) {
 
-                            //Do something with the scores here
-                            if(message!=0){ // Threshold has been met
+                            //Get the current prices for the instrument
 
-                                console.log("");
-                                console.log("Prediction made at:" + convertUTCDateToLocalDate(server_time).toString());
-                                console.log("High: " + message[0]);
-                                console.log("Low: " + message[1]);
-                                console.log("Close: " + message[2]);
+                            request({url:domain+"/v1/prices?instruments="+watcher.instrument, headers: headers}, function(error, response, body){
 
-                                watcher.last_predicted_price = 0;
+                                //Get the price details for the requested instrument
+                                var price = JSON.parse(body);
 
-                                query = "UPDATE watchers "+
-                                "SET last_updated='"+convertUTCDateToLocalDate(server_time).toISOString()+"'"+
-                                ", last_predicted_price="+watcher.last_predicted_price.toFixed(5)+
-                                " WHERE id="+watcher.id;
+                                var currentBid = 0;
+                                var currentAsk = 0;
 
-                                connection.query(query, function(err, rows, fields) {
-                                    if (err == null) {
+                                currentBid = parseFloat(price.prices[0].bid);
+                                currentAsk = parseFloat(price.prices[0].ask);
 
-                                    } else {
-                                        console.log(err);
+                                spread = ((currentAsk-currentBid)/2).toFixed(5);
+
+                                var guessHigh = parseFloat(message[0]).toFixed(5);
+                                var guessLow = parseFloat(message[1]).toFixed(5);
+                                var guessClose = parseFloat(message[2]).toFixed(5);
+
+                                if((guessHigh-currentAsk-spread).toFixed(5)>0||(guessClose-currentAsk-spread).toFixed(5)>0){
+                                    console.log("");
+                                    console.log(watcher.instrument);
+                                    console.log("The current ask price is "+ currentAsk + ", while the predicted high value is " + guessHigh + " and close value is " + guessClose);
+                                    if((guessHigh-currentAsk-spread).toFixed(5)>0){
+                                        console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (guessHigh-currentAsk-spread).toFixed(5).toString() + " pips based on the predicted high value if you buy.");
+                                        //placeOrder(watcher.instrument, 100, 'buy', guessHigh, 0);
                                     }
-                                });
+                                    if((guessClose-currentAsk-spread).toFixed(5)>0){
+                                        console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (guessClose-currentAsk-spread).toFixed(5).toString() + " pips based on the predicted close value if you buy.");
+                                        placeOrder(watcher.instrument, 2000, 'buy', guessClose, 0);
+                                    }
+                                }
 
-                            }
+                                if((currentBid-guessLow-spread).toFixed(5)>0||(currentBid-guessClose-spread).toFixed(5)>0){
+                                    console.log("");
+                                    console.log(watcher.instrument);
+                                    console.log("The current bid price is "+ currentBid + ", while the predicted low value is " + guessLow + " and close value is " + guessClose);
+                                    if((currentBid-guessLow-spread).toFixed(5)>0){
+                                        console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (currentBid-guessLow-spread).toFixed(5).toString() + " pips based on the predicted low value if you short.");
+                                        //placeOrder(watcher.instrument, 1000, 'sell', guessLow, 0);
+                                    }
+                                    if((currentBid-guessClose-spread).toFixed(5)>0){
+                                        console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (currentBid-guessClose-spread).toFixed(5).toString() + " pips based on the predicted close value if you short.");
+                                        placeOrder(watcher.instrument, 2000, 'sell', guessClose, 0);
+                                    }                     
+                               }
+                            });
 
+                            //Archive the data
+                            query = "INSERT INTO watcher_scores (watcher_id,close_difference,high_difference,low_difference,score_date) VALUES ("+
+                            watcher.id+","+
+                            (parseFloat(watcher.previous_close)-lastClose).toFixed(5).toString()+","+
+                            (parseFloat(watcher.previous_high)-lastHigh).toFixed(5).toString()+","+
+                            (parseFloat(watcher.previous_low)-lastLow).toFixed(5).toString()+",'"+
+                            convertUTCDateToLocalDate(server_time).toISOString()+"')";
+
+                            connection.query(query, function(err, rows, fields) {
+                
+                                if (err == null) {
+
+                                    query = "UPDATE watchers "+
+                                    "SET last_updated='"+convertUTCDateToLocalDate(server_time).toISOString()+
+                                    "', previous_close="+message[2]+
+                                    ", previous_high="+message[0]+
+                                    ", previous_low="+message[1]+
+                                    " WHERE id="+watcher.id;
+
+                                    connection.query(query, function(err, rows, fields) {
+                                        if (err == null) {               
+                                        } else {
+                                            console.log(err);
+                                        }
+                                    });
+
+                                } else {
+                                    console.log(err);
+                                }
+                            });
                         });
 
                         pyshell.end(function(err) {
@@ -291,12 +355,31 @@ app.listen(3000, function () {
 });
 
 function convertUTCDateToLocalDate(date) {
-    var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+    var tzoffset = new Date().getTimezoneOffset()*60*1000;
+    return new Date(Date.now() - tzoffset);   
+}
 
-    var offset = date.getTimezoneOffset() / 60;
-    var hours = date.getHours();
+function placeOrder(instrument, units, side, takeProfit, stopLoss){
 
-    newDate.setHours(hours - offset);
+    request({
 
-    return newDate;   
+        url:domain+"/v1/accounts/"+account_id+"/orders", 
+        headers: headers,
+        form: {
+            "instrument":instrument,
+            "units":units,
+            "side":side,
+            "type":"market",
+            "trailingStop":10,
+            "takeProfit":takeProfit,
+            "stopLoss":stopLoss
+        },
+        method:'POST'
+    },
+    function(error, response, body){
+        if(error){
+            console.log(error);
+        }
+    });
+            
 }

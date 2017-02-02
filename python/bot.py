@@ -18,22 +18,12 @@ for line in sys.stdin:
 	lines.append(line)
 
 inputFile = lines[0]
-score_threshold = lines[1]
 
 #Data
 data = json.loads(inputFile)
 
 #Number of candlesticks to look at per Y value
 n = 5
-
-#Possible Y values (note: these may change depending on the data loaded above)
-OPEN = 0;
-HIGH = 1;
-LOW = 2;
-CLOSE = 3;
-
-#Selected Y value
-y_type = 1;
 
 #Selected CLF
 clf = [
