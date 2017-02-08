@@ -69,6 +69,7 @@ response['classifiers'] = []
 for x in range(0,len(clf)):
 
 	predictions = []
+	differences = []
 	answers = y_data[:]
 
 	for i in range(0, len(y_data)):
@@ -79,10 +80,12 @@ for x in range(0,len(clf)):
 		clf[x].fit(x_train,y_train)
 		predictions.append(clf[x].predict(x_data).tolist())
 		answers[i] = np.array(answers[i]).tolist()
+		differences.append(np.absolute(np.subtract(answers[i],predictions[i][:-1])))
+		differences[i] = np.average(differences[i]);
 
-		predictions[i] = predictions[i][-21:]
-		answers[i] = answers[i][-20:]
+		predictions[i] = predictions[i][-31:]
+		answers[i] = answers[i][-30:]
 
-	response['classifiers'].append({'name': names[x], 'score': 0, 'predictions': predictions, 'answers': answers})
+	response['classifiers'].append({'name': names[x], 'score': 0, 'predictions': predictions, 'answers': answers, 'differences': differences})
 
 print(json.dumps(response))

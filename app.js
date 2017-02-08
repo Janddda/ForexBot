@@ -24,7 +24,7 @@ var connection = mysql.createConnection({
  */
 
  var watchers = null;
- var writing = false;
+ var trades = [];
 
 /*
 * API Set-up
@@ -186,6 +186,10 @@ app.get('/scores', function(req, res) {
 
 setInterval(function() {
 
+    request({url:domain+"/v1/accounts/"+account_id+"/trades", headers: headers}, function(error, response, body){
+        trades = JSON.parse(body).trades;
+    });
+
     if(new Date().getSeconds() != 5) {
         return;
     }
@@ -270,31 +274,31 @@ setInterval(function() {
                                 var guessLow = parseFloat(message[1]).toFixed(5);
                                 var guessClose = parseFloat(message[2]).toFixed(5);
 
-                                if((guessHigh-currentAsk-spread).toFixed(5)>0||(guessClose-currentAsk-spread).toFixed(5)>0){
+                                if((guessHigh-currentAsk-spread).toFixed(5)>spread||(guessClose-currentAsk-spread).toFixed(5)>0){
                                     console.log("");
                                     console.log(watcher.instrument);
                                     console.log("The current ask price is "+ currentAsk + ", while the predicted high value is " + guessHigh + " and close value is " + guessClose);
                                     if((guessHigh-currentAsk-spread).toFixed(5)>0){
                                         console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (guessHigh-currentAsk-spread).toFixed(5).toString() + " pips based on the predicted high value if you buy.");
-                                        //placeOrder(watcher.instrument, 100, 'buy', guessHigh, 0);
+                                        placeOrder(watcher.instrument, 2000, 'buy', guessHigh-spread, 0);
                                     }
                                     if((guessClose-currentAsk-spread).toFixed(5)>0){
                                         console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (guessClose-currentAsk-spread).toFixed(5).toString() + " pips based on the predicted close value if you buy.");
-                                        placeOrder(watcher.instrument, 2000, 'buy', guessClose, 0);
+                                        //placeOrder(watcher.instrument, 2000, 'buy', guessClose, 0);
                                     }
                                 }
 
-                                if((currentBid-guessLow-spread).toFixed(5)>0||(currentBid-guessClose-spread).toFixed(5)>0){
+                                if((currentBid-guessLow-spread).toFixed(5)>spread||(currentBid-guessClose-spread).toFixed(5)>0){
                                     console.log("");
                                     console.log(watcher.instrument);
                                     console.log("The current bid price is "+ currentBid + ", while the predicted low value is " + guessLow + " and close value is " + guessClose);
                                     if((currentBid-guessLow-spread).toFixed(5)>0){
                                         console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (currentBid-guessLow-spread).toFixed(5).toString() + " pips based on the predicted low value if you short.");
-                                        //placeOrder(watcher.instrument, 1000, 'sell', guessLow, 0);
+                                        placeOrder(watcher.instrument, 2000, 'sell', guessLow+spread, 0);
                                     }
                                     if((currentBid-guessClose-spread).toFixed(5)>0){
                                         console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (currentBid-guessClose-spread).toFixed(5).toString() + " pips based on the predicted close value if you short.");
-                                        placeOrder(watcher.instrument, 2000, 'sell', guessClose, 0);
+                                        //placeOrder(watcher.instrument, 2000, 'sell', guessClose, 0);
                                     }                     
                                }
                             });
@@ -361,6 +365,13 @@ function convertUTCDateToLocalDate(date) {
 
 function placeOrder(instrument, units, side, takeProfit, stopLoss){
 
+    for(var i=0; i<trades.length; i++){
+        if(trades[i].instrument == instrument){
+            console.log("Existing trade for instrument.");
+            return;
+        }
+    }
+
     request({
 
         url:domain+"/v1/accounts/"+account_id+"/orders", 
@@ -370,7 +381,7 @@ function placeOrder(instrument, units, side, takeProfit, stopLoss){
             "units":units,
             "side":side,
             "type":"market",
-            "trailingStop":10,
+            "trailingStop":5,
             "takeProfit":takeProfit,
             "stopLoss":stopLoss
         },
@@ -379,6 +390,8 @@ function placeOrder(instrument, units, side, takeProfit, stopLoss){
     function(error, response, body){
         if(error){
             console.log(error);
+        }else{
+            console.log(body);
         }
     });
             

@@ -93,11 +93,16 @@ app.controller('myCtrl', function($scope, $http) {
             var avg = {
                 name: 'Average Prediction',
                 answers: $scope.classifiers[0].answers,
+                differences: [],
                 predictions: [],
                 score: 1,
                 best_params: []
             };
       
+            var ahd = 0;
+            var ald = 0;
+            var acd = 0;
+
             for(var i=0; i<$scope.classifiers[0].predictions.length; i++){
                 avg.predictions.push([]);
                 for(var p=0; p<$scope.classifiers[0].predictions[i].length; p++){
@@ -107,8 +112,26 @@ app.controller('myCtrl', function($scope, $http) {
                     }
                     a = a/$scope.classifiers.length;
                     avg.predictions[i].push(a);
+                    if(avg.answers[0][p]!=null){
+                        if(i==0){
+                            ahd += Math.abs(a-avg.answers[0][p]);  
+                        }
+                        if(i==1){
+                            ald += Math.abs(a-avg.answers[1][p]);
+                        }
+                        if(i==2){
+                            acd += Math.abs(a-avg.answers[2][p]);
+                        }
+                    }
                 }
             }
+
+            ahd = ahd/(avg.answers[0].length+1);
+            ald = ald/(avg.answers[0].length+1);
+            acd = acd/(avg.answers[0].length+1);
+            avg.differences.push(ahd);
+            avg.differences.push(ald);
+            avg.differences.push(acd);
 
             $scope.classifiers.push(avg);
 

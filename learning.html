@@ -73,7 +73,8 @@
           <table>
             <tbody ng-repeat="clf in classifiers | orderBy:'score':true">
               <tr>
-                <td colspan="2"><h4 style="padding-top: 10px;">{{clf.name}}</h4></td>
+                <td colspan="1"><h4 style="padding-top: 10px;">{{clf.name}}</h4></td>
+                <td>AHD: {{clf.differences[0].toFixed(5)}} | ALD: {{clf.differences[1].toFixed(5)}} | ACD: {{clf.differences[2].toFixed(5)}}</td>
               </tr>
               <tr>
                 <td colspan="2">
