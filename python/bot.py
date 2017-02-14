@@ -27,10 +27,10 @@ n = 5
 
 #Selected CLF
 clf = [
-linear_model.BayesianRidge(n_iter=3),
-neighbors.KNeighborsRegressor(weights='distance'),
-svm.NuSVR(kernel='linear'),
-ensemble.AdaBoostRegressor(tree.DecisionTreeRegressor(),n_estimators=100)
+linear_model.BayesianRidge(n_iter=3)
+#neighbors.KNeighborsRegressor(weights='distance'),
+#svm.NuSVR(kernel='linear'),
+#ensemble.AdaBoostRegressor(tree.DecisionTreeRegressor(),n_estimators=100)
 ]
 
 #x_data

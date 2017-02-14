@@ -90,7 +90,7 @@ app.controller('myCtrl', function($scope, $http) {
             $scope.state = 1;
             $scope.loading = false;
 
-            var avg = {
+            /* var avg = {
                 name: 'Average Prediction',
                 answers: $scope.classifiers[0].answers,
                 differences: [],
@@ -133,7 +133,7 @@ app.controller('myCtrl', function($scope, $http) {
             avg.differences.push(ald);
             avg.differences.push(acd);
 
-            $scope.classifiers.push(avg);
+            $scope.classifiers.push(avg); */
 
             setTimeout(function(){
 
@@ -150,14 +150,14 @@ app.controller('myCtrl', function($scope, $http) {
                     var ctx = document.getElementById(c.name+"Chart");
 
                     var ch = new Chart(ctx, {
-                        type: 'line',
+                        type: 'bar',
                         data: {
                             labels: new Array(c.predictions[0].length),
                             datasets: [{
                                 label: 'High Predictions',
                                 data: c.predictions[0],
                                 lineTension: 0,
-                                fill: false,
+                                fill: true,
                                 borderColor: '#2ecc71',
                                 borderWidth: 1,
                                 pointRadius: 1
@@ -166,7 +166,7 @@ app.controller('myCtrl', function($scope, $http) {
                                 label: 'High Answers',
                                 data: c.answers[0],
                                 lineTension: 0, 
-                                fill: false,
+                                fill: true,
                                 borderColor: '#27ae60',
                                 borderWidth: 2,
                                 pointRadius: 1
@@ -175,7 +175,7 @@ app.controller('myCtrl', function($scope, $http) {
                                 label: 'Low Predictions',
                                 data: c.predictions[1],
                                 lineTension: 0,
-                                fill: false,
+                                fill: true,
                                 borderColor: '#e74c3c',
                                 borderWidth: 1,
                                 pointRadius: 1
@@ -184,7 +184,7 @@ app.controller('myCtrl', function($scope, $http) {
                                 label: 'Low Answers',
                                 data: c.answers[1],
                                 lineTension: 0, 
-                                fill: false,
+                                fill: true,
                                 borderColor: '#c0392b',
                                 borderWidth: 2,
                                 pointRadius: 1
@@ -193,7 +193,7 @@ app.controller('myCtrl', function($scope, $http) {
                                 label: 'Close Predictions',
                                 data: c.predictions[2],
                                 lineTension: 0,
-                                fill: false,
+                                fill: true,
                                 borderColor: '#3498db',
                                 borderWidth: 1,
                                 pointRadius: 1
@@ -202,13 +202,14 @@ app.controller('myCtrl', function($scope, $http) {
                                 label: 'Close Answers',
                                 data: c.answers[2],
                                 lineTension: 0, 
-                                fill: false,
+                                fill: true,
                                 borderColor: '#2980b9',
                                 borderWidth: 2,
                                 pointRadius: 1
                             }]
                         },
                         options: {
+                            showLines: true,
                             scales: {
                                 yAxes: [{
                                     display: true,

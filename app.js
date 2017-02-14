@@ -13,7 +13,7 @@ app.use(bodyParser.json());
  */
 var mysql = require('mysql');
 var connection = mysql.createConnection({
-    host: 'localhost',
+    host: '192.168.1.132',
     user: 'root',
     password: '$endiksScale',
     database: 'forex'
@@ -186,8 +186,14 @@ app.get('/scores', function(req, res) {
 
 setInterval(function() {
 
+    //return; //Easy off/on switch
+
     request({url:domain+"/v1/accounts/"+account_id+"/trades", headers: headers}, function(error, response, body){
-        trades = JSON.parse(body).trades;
+        if(error){
+            console.log(error);
+        }else{
+            trades = JSON.parse(body).trades;     
+        }
     });
 
     if(new Date().getSeconds() != 5) {
@@ -274,13 +280,13 @@ setInterval(function() {
                                 var guessLow = parseFloat(message[1]).toFixed(5);
                                 var guessClose = parseFloat(message[2]).toFixed(5);
 
-                                if((guessHigh-currentAsk-spread).toFixed(5)>spread||(guessClose-currentAsk-spread).toFixed(5)>0){
+                                if((guessHigh-currentAsk-spread).toFixed(5)>spread&&(guessClose-currentAsk-spread).toFixed(5)>0){
                                     console.log("");
                                     console.log(watcher.instrument);
                                     console.log("The current ask price is "+ currentAsk + ", while the predicted high value is " + guessHigh + " and close value is " + guessClose);
-                                    if((guessHigh-currentAsk-spread).toFixed(5)>0){
+                                    if((guessHigh-currentAsk-spread).toFixed(5)>spread){
                                         console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (guessHigh-currentAsk-spread).toFixed(5).toString() + " pips based on the predicted high value if you buy.");
-                                        placeOrder(watcher.instrument, 2000, 'buy', guessHigh-spread, 0);
+                                        placeOrder(watcher.instrument, 2000, 'buy', guessHigh, 0);
                                     }
                                     if((guessClose-currentAsk-spread).toFixed(5)>0){
                                         console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (guessClose-currentAsk-spread).toFixed(5).toString() + " pips based on the predicted close value if you buy.");
@@ -288,13 +294,13 @@ setInterval(function() {
                                     }
                                 }
 
-                                if((currentBid-guessLow-spread).toFixed(5)>spread||(currentBid-guessClose-spread).toFixed(5)>0){
+                                if((currentBid-guessLow-spread).toFixed(5)>spread&&(currentBid-guessClose-spread).toFixed(5)>0){
                                     console.log("");
                                     console.log(watcher.instrument);
                                     console.log("The current bid price is "+ currentBid + ", while the predicted low value is " + guessLow + " and close value is " + guessClose);
-                                    if((currentBid-guessLow-spread).toFixed(5)>0){
+                                    if((currentBid-guessLow-spread).toFixed(5)>spread){
                                         console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (currentBid-guessLow-spread).toFixed(5).toString() + " pips based on the predicted low value if you short.");
-                                        placeOrder(watcher.instrument, 2000, 'sell', guessLow+spread, 0);
+                                        placeOrder(watcher.instrument, 2000, 'sell', guessLow, 0);
                                     }
                                     if((currentBid-guessClose-spread).toFixed(5)>0){
                                         console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (currentBid-guessClose-spread).toFixed(5).toString() + " pips based on the predicted close value if you short.");

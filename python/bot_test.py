@@ -14,6 +14,7 @@ from sklearn import ensemble
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import mean_absolute_error
 
 from sklearn import preprocessing
 
@@ -32,13 +33,21 @@ train_percent = float(lines[1])
 n = int(lines[2])
 
 #Machine Learning Algorithms (for now we are not passing in any parameters)
-names = ["Bayesian Ridge", "K Neighbors Regressor", "NuSVR", "AdaBoost Regressor"]
+names = ["Bayesian Ridge",
+		#"Random Forest"
+		#"LASSO"
+		#"K Neighbors Regressor",
+		#"NuSVR",
+		#"AdaBoost Regressor"
+		]
 
 clf = [
 linear_model.BayesianRidge(n_iter=3),
-neighbors.KNeighborsRegressor(weights='distance'),
-svm.NuSVR(kernel='linear'),
-ensemble.AdaBoostRegressor(tree.DecisionTreeRegressor(),n_estimators=100)
+#ensemble.RandomForestRegressor(n_estimators=6,criterion='mae',random_state=42)
+#linear_model.Lasso(alpha=1e-10, max_iter=10000)
+#neighbors.KNeighborsRegressor(weights='distance'),
+#svm.NuSVR(kernel='linear'),
+#ensemble.AdaBoostRegressor(tree.DecisionTreeRegressor(),n_estimators=100)
 ]
 
 #x_data
@@ -75,16 +84,15 @@ for x in range(0,len(clf)):
 	for i in range(0, len(y_data)):
 
 		#split training and test data
-		x_train, x_test, y_train, y_test = train_test_split(x_data[:-1], y_data[i], train_size=train_percent)
+		x_train, x_test, y_train, y_test = train_test_split(x_data[:-1], y_data[i], train_size=train_percent, random_state=42)
 
 		clf[x].fit(x_train,y_train)
-		predictions.append(clf[x].predict(x_data).tolist())
-		answers[i] = np.array(answers[i]).tolist()
-		differences.append(np.absolute(np.subtract(answers[i],predictions[i][:-1])))
-		differences[i] = np.average(differences[i]);
+		predictions.append(clf[x].predict(x_test).tolist())
+		answers[i] = np.array(y_test).tolist()
 
-		predictions[i] = predictions[i][-31:]
-		answers[i] = answers[i][-30:]
+		differences.append(mean_absolute_error(y_test,predictions[i]))
+		predictions[i] = predictions[i][-15:]
+		answers[i] = answers[i][-15:]
 
 	response['classifiers'].append({'name': names[x], 'score': 0, 'predictions': predictions, 'answers': answers, 'differences': differences})
 
