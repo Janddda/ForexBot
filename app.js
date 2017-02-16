@@ -127,30 +127,67 @@ app.post('/test', function(req, res) {
             candles = candles.candles; //Discard other info
 
             //Filter candle which is not completed if it exists
-    		candles = candles.filter(function(c){
-    			return c.complete == true;
-    		});
+            candles = candles.filter(function(c){
+                return c.complete == true;
+            });
 
-            //Trim down data to just ask prices for now, start out simple.
+            //Trim down data
             candles = candles.map(function(c){
-                return [c.openMid,c.highMid,c.lowMid,c.closeMid];
+                return [c.openMid,c.highMid,c.lowMid,c.closeMid,c.volume];
             });
 
-            var pyshell = new PythonShell('/python/bot_test.py', { mode: 'json' });
+            url = domain+'/v1/candles?instrument='+req.body.instrument+
+                                '&granularity='+req.body.secondary_granularity+
+                                '&count='+req.body.candle_count+
+                                '&candleFormat=midpoint';
 
-            pyshell.send(candles);
-            pyshell.send(parseFloat(req.body.train_percent));
-            pyshell.send(parseInt(req.body.n));
+            request(url, function(err, response, body) {
 
-            pyshell.on('message', function(message) {
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.write(JSON.stringify({ message: message }));
-                res.end();
+                if (err == null) {
+
+                    var secondary_candles = JSON.parse(body);
+                    secondary_candles = secondary_candles.candles;
+
+                    secondary_candles = secondary_candles.filter(function(c){
+                        return c.complete == true;
+                    });
+
+                    secondary_candles = secondary_candles.map(function(c){
+                        return [c.openMid,c.highMid,c.lowMid,c.closeMid,c.volume];
+                    });
+
+                    for(var i=0; i<candles.length; i++){
+                        for(var j=0; j<secondary_candles[i].length; j++){
+                            candles[i].push(secondary_candles[i][j]);
+                        }
+                    }
+
+                    var pyshell = new PythonShell('/python/bot_test.py', { mode: 'json' });
+
+                    pyshell.send(candles);
+                    pyshell.send(parseFloat(req.body.train_percent));
+                    pyshell.send(parseInt(req.body.n));
+
+                    pyshell.on('message', function(message) {
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.write(JSON.stringify({ message: message }));
+                        res.end();
+                    });
+
+                    pyshell.end(function(err) {
+                        if (err) throw err;
+                    });
+
+                } else {
+                    console.log(err);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.write(JSON.stringify({ success: false }));
+                    res.end();
+                }
+
             });
 
-            pyshell.end(function(err) {
-                if (err) throw err;
-            });
+            
 
         } else {
             console.log(err);

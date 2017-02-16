@@ -35,8 +35,12 @@
           <select ng-options="instrument.instrument as instrument.displayName for instrument in instruments | orderBy: instrument.displayName" ng-model="selectedInstrument">
           </select>
         </label>
-        <label>Granularity
+        <label>Main Granularity
           <select ng-options="g.value as g.description for g in granularities" ng-model="selectedGranularity">
+          </select>
+        </label>
+        <label>Secondary Granularity
+          <select ng-options="g.value as g.description for g in granularities" ng-model="selectedSecondaryGranularity">
           </select>
         </label>
         <label>Candle Count
@@ -62,6 +66,7 @@
           <h4>Settings</h4>
           Instrument: {{selectedInstrument}}<br>
           Granularity: {{selectedGranularity}}<br>
+          2nd Granularity: {{selectedSecondaryGranularity}}<br>
           Candle Count: {{candleCount}}<br>
           Train Percentage: {{trainPercent}}<br>
           Num Previous Candles: {{n}}<br>
