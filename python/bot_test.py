@@ -50,6 +50,13 @@ linear_model.BayesianRidge(n_iter=3),
 #ensemble.AdaBoostRegressor(tree.DecisionTreeRegressor(),n_estimators=100)
 ]
 
+params = [
+	[{'n_iter': [3000],
+	  'tol': [1e-20],
+	  'alpha_1': [1e-9],
+	  'alpha_2': [1e-6]}]
+]
+
 #x_data
 x_data = np.concatenate(data[0:n])
 
@@ -86,14 +93,15 @@ for x in range(0,len(clf)):
 		#split training and test data
 		x_train, x_test, y_train, y_test = train_test_split(x_data[:-1], y_data[i], train_size=train_percent, random_state=42)
 
-		clf[x].fit(x_train,y_train)
-		predictions.append(clf[x].predict(x_test).tolist())
+		clfg = GridSearchCV(clf[x],params[x],cv=5)
+		clfg.fit(x_train,y_train)
+		predictions.append(clfg.predict(x_test).tolist())
 		answers[i] = np.array(y_test).tolist()
 
 		differences.append(mean_absolute_error(y_test,predictions[i]))
 		predictions[i] = predictions[i][-15:]
 		answers[i] = answers[i][-15:]
 
-	response['classifiers'].append({'name': names[x], 'score': 0, 'predictions': predictions, 'answers': answers, 'differences': differences})
+	response['classifiers'].append({'name': names[x], 'score': 0, 'predictions': predictions, 'answers': answers, 'differences': differences, 'best_params': clfg.best_params_})
 
 print(json.dumps(response))

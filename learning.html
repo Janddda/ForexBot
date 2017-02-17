@@ -79,7 +79,11 @@
             <tbody ng-repeat="clf in classifiers | orderBy:'score':true">
               <tr>
                 <td colspan="1"><h4 style="padding-top: 10px;">{{clf.name}}</h4></td>
-                <td>AHD: {{clf.differences[0].toFixed(5)}} | ALD: {{clf.differences[1].toFixed(5)}} | ACD: {{clf.differences[2].toFixed(5)}}</td>
+                <td>AHD: {{clf.differences[0].toFixed(6)}} | ALD: {{clf.differences[1].toFixed(6)}} | ACD: {{clf.differences[2].toFixed(6)}}</td>
+              </tr>
+              <tr>
+                <td colspan="1"><h4 style="padding-top: 10px;">best params:</h4></td>
+                <td>{{clf.best_params}}</td>
               </tr>
               <tr>
                 <td colspan="2">

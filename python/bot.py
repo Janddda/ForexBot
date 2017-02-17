@@ -23,11 +23,11 @@ inputFile = lines[0]
 data = json.loads(inputFile)
 
 #Number of candlesticks to look at per Y value
-n = 5
+n = 3
 
 #Selected CLF
 clf = [
-linear_model.BayesianRidge(n_iter=3)
+linear_model.BayesianRidge(n_iter=3000,tol=1e-20,alpha_1=1e-9)
 #neighbors.KNeighborsRegressor(weights='distance'),
 #svm.NuSVR(kernel='linear'),
 #ensemble.AdaBoostRegressor(tree.DecisionTreeRegressor(),n_estimators=100)

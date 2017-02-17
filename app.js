@@ -279,111 +279,138 @@ setInterval(function() {
 
             		//Trim down data to just bid prices for now, start out simple.
             		candles = candles.map(function(c){
-            			return [c.openMid,c.highMid,c.lowMid,c.closeMid];
+            			return [c.openMid,c.highMid,c.lowMid,c.closeMid, c.volume];
             		});
 
-                    var server_time = new Date(last_time);
-                    var watcher_time = new Date(watcher.last_updated);
+                    url = domain+'/v1/candles?instrument='+w.instrument+
+                                '&granularity='+'M5'+
+                                '&count='+w.candle_count+
+                                '&candleFormat=midpoint';
 
-                    var lastHigh = parseFloat(candles[candles.length-1][1]);
-                    var lastLow = parseFloat(candles[candles.length-1][2]);
-                    var lastClose = parseFloat(candles[candles.length-1][3]);
+                    request(url, function(err, response, body) {
 
-                    if(watcher_time.getTime() < server_time.getTime()) {
+                        var secondary_candles = JSON.parse(body);
+                        secondary_candles = secondary_candles.candles;
 
-                        //Pass the data into our python script
-                        var pyshell = new PythonShell('/python/bot.py', { mode: 'json' });
+                        secondary_candles = secondary_candles.filter(function(c){
+                            return c.complete == true;
+                        });
 
-                        pyshell.send(candles);
+                        secondary_candles = secondary_candles.map(function(c){
+                            return [c.openMid,c.highMid,c.lowMid,c.closeMid,c.volume];
+                        });
 
-                        pyshell.on('message', function(message) {
+                        for(var i=0; i<candles.length; i++){
+                            for(var j=0; j<secondary_candles[i].length; j++){
+                                candles[i].push(secondary_candles[i][j]);
+                            }
+                        }
 
-                            //Get the current prices for the instrument
+                        var server_time = new Date(last_time);
+                        var watcher_time = new Date(watcher.last_updated);
 
-                            request({url:domain+"/v1/prices?instruments="+watcher.instrument, headers: headers}, function(error, response, body){
+                        var lastHigh = parseFloat(candles[candles.length-1][1]);
+                        var lastLow = parseFloat(candles[candles.length-1][2]);
+                        var lastClose = parseFloat(candles[candles.length-1][3]);
 
-                                //Get the price details for the requested instrument
-                                var price = JSON.parse(body);
+                        if(watcher_time.getTime() < server_time.getTime()) {
 
-                                var currentBid = 0;
-                                var currentAsk = 0;
+                            //Pass the data into our python script
+                            var pyshell = new PythonShell('/python/bot.py', { mode: 'json' });
 
-                                currentBid = parseFloat(price.prices[0].bid);
-                                currentAsk = parseFloat(price.prices[0].ask);
+                            pyshell.send(candles);
 
-                                spread = ((currentAsk-currentBid)/2).toFixed(5);
+                            pyshell.on('message', function(message) {
 
-                                var guessHigh = parseFloat(message[0]).toFixed(5);
-                                var guessLow = parseFloat(message[1]).toFixed(5);
-                                var guessClose = parseFloat(message[2]).toFixed(5);
+                                //Get the current prices for the instrument
 
-                                if((guessHigh-currentAsk-spread).toFixed(5)>spread&&(guessClose-currentAsk-spread).toFixed(5)>0){
-                                    console.log("");
-                                    console.log(watcher.instrument);
-                                    console.log("The current ask price is "+ currentAsk + ", while the predicted high value is " + guessHigh + " and close value is " + guessClose);
-                                    if((guessHigh-currentAsk-spread).toFixed(5)>spread){
-                                        console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (guessHigh-currentAsk-spread).toFixed(5).toString() + " pips based on the predicted high value if you buy.");
-                                        placeOrder(watcher.instrument, 2000, 'buy', guessHigh, 0);
-                                    }
-                                    if((guessClose-currentAsk-spread).toFixed(5)>0){
-                                        console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (guessClose-currentAsk-spread).toFixed(5).toString() + " pips based on the predicted close value if you buy.");
-                                        //placeOrder(watcher.instrument, 2000, 'buy', guessClose, 0);
-                                    }
-                                }
+                                request({url:domain+"/v1/prices?instruments="+watcher.instrument, headers: headers}, function(error, response, body){
 
-                                if((currentBid-guessLow-spread).toFixed(5)>spread&&(currentBid-guessClose-spread).toFixed(5)>0){
-                                    console.log("");
-                                    console.log(watcher.instrument);
-                                    console.log("The current bid price is "+ currentBid + ", while the predicted low value is " + guessLow + " and close value is " + guessClose);
-                                    if((currentBid-guessLow-spread).toFixed(5)>spread){
-                                        console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (currentBid-guessLow-spread).toFixed(5).toString() + " pips based on the predicted low value if you short.");
-                                        placeOrder(watcher.instrument, 2000, 'sell', guessLow, 0);
-                                    }
-                                    if((currentBid-guessClose-spread).toFixed(5)>0){
-                                        console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (currentBid-guessClose-spread).toFixed(5).toString() + " pips based on the predicted close value if you short.");
-                                        //placeOrder(watcher.instrument, 2000, 'sell', guessClose, 0);
-                                    }                     
-                               }
-                            });
+                                    //Get the price details for the requested instrument
+                                    var price = JSON.parse(body);
 
-                            //Archive the data
-                            query = "INSERT INTO watcher_scores (watcher_id,close_difference,high_difference,low_difference,score_date) VALUES ("+
-                            watcher.id+","+
-                            (parseFloat(watcher.previous_close)-lastClose).toFixed(5).toString()+","+
-                            (parseFloat(watcher.previous_high)-lastHigh).toFixed(5).toString()+","+
-                            (parseFloat(watcher.previous_low)-lastLow).toFixed(5).toString()+",'"+
-                            convertUTCDateToLocalDate(server_time).toISOString()+"')";
+                                    var currentBid = 0;
+                                    var currentAsk = 0;
 
-                            connection.query(query, function(err, rows, fields) {
-                
-                                if (err == null) {
+                                    currentBid = parseFloat(price.prices[0].bid);
+                                    currentAsk = parseFloat(price.prices[0].ask);
 
-                                    query = "UPDATE watchers "+
-                                    "SET last_updated='"+convertUTCDateToLocalDate(server_time).toISOString()+
-                                    "', previous_close="+message[2]+
-                                    ", previous_high="+message[0]+
-                                    ", previous_low="+message[1]+
-                                    " WHERE id="+watcher.id;
+                                    spread = ((currentAsk-currentBid)/2).toFixed(5);
 
-                                    connection.query(query, function(err, rows, fields) {
-                                        if (err == null) {               
-                                        } else {
-                                            console.log(err);
+                                    var guessHigh = parseFloat(message[0]).toFixed(5);
+                                    var guessLow = parseFloat(message[1]).toFixed(5);
+                                    var guessClose = parseFloat(message[2]).toFixed(5);
+
+                                    if((guessHigh-currentAsk-spread).toFixed(5)>spread&&(guessClose-currentAsk-spread).toFixed(5)>0){
+                                        console.log("");
+                                        console.log(watcher.instrument);
+                                        console.log("The current ask price is "+ currentAsk + ", while the predicted high value is " + guessHigh + " and close value is " + guessClose);
+                                        if((guessHigh-currentAsk-spread).toFixed(5)>spread){
+                                            console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (guessHigh-currentAsk-spread).toFixed(5).toString() + " pips based on the predicted high value if you buy.");
+                                            placeOrder(watcher.instrument, 2000, 'buy', guessHigh, 0);
                                         }
-                                    });
+                                        if((guessClose-currentAsk-spread).toFixed(5)>0){
+                                            console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (guessClose-currentAsk-spread).toFixed(5).toString() + " pips based on the predicted close value if you buy.");
+                                            //placeOrder(watcher.instrument, 2000, 'buy', guessClose, 0);
+                                        }
+                                    }
 
-                                } else {
-                                    console.log(err);
-                                }
+                                    if((currentBid-guessLow-spread).toFixed(5)>spread&&(currentBid-guessClose-spread).toFixed(5)>0){
+                                        console.log("");
+                                        console.log(watcher.instrument);
+                                        console.log("The current bid price is "+ currentBid + ", while the predicted low value is " + guessLow + " and close value is " + guessClose);
+                                        if((currentBid-guessLow-spread).toFixed(5)>spread){
+                                            console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (currentBid-guessLow-spread).toFixed(5).toString() + " pips based on the predicted low value if you short.");
+                                            placeOrder(watcher.instrument, 2000, 'sell', guessLow, 0);
+                                        }
+                                        if((currentBid-guessClose-spread).toFixed(5)>0){
+                                            console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (currentBid-guessClose-spread).toFixed(5).toString() + " pips based on the predicted close value if you short.");
+                                            //placeOrder(watcher.instrument, 2000, 'sell', guessClose, 0);
+                                        }                     
+                                   }
+                                });
+
+                                //Archive the data
+                                query = "INSERT INTO watcher_scores (watcher_id,close_difference,high_difference,low_difference,score_date) VALUES ("+
+                                watcher.id+","+
+                                (parseFloat(watcher.previous_close)-lastClose).toFixed(5).toString()+","+
+                                (parseFloat(watcher.previous_high)-lastHigh).toFixed(5).toString()+","+
+                                (parseFloat(watcher.previous_low)-lastLow).toFixed(5).toString()+",'"+
+                                convertUTCDateToLocalDate(server_time).toISOString()+"')";
+
+                                connection.query(query, function(err, rows, fields) {
+                    
+                                    if (err == null) {
+
+                                        query = "UPDATE watchers "+
+                                        "SET last_updated='"+convertUTCDateToLocalDate(server_time).toISOString()+
+                                        "', previous_close="+message[2]+
+                                        ", previous_high="+message[0]+
+                                        ", previous_low="+message[1]+
+                                        " WHERE id="+watcher.id;
+
+                                        connection.query(query, function(err, rows, fields) {
+                                            if (err == null) {               
+                                            } else {
+                                                console.log(err);
+                                            }
+                                        });
+
+                                    } else {
+                                        console.log(err);
+                                    }
+                                });
                             });
-                        });
 
-                        pyshell.end(function(err) {
-                            if (err) throw err;
-                        });
+                            pyshell.end(function(err) {
+                                if (err) throw err;
+                            });
 
-                    }
+                        }
 
+
+                    });
+                    
             	});  
             });
 
