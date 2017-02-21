@@ -225,17 +225,17 @@ setInterval(function() {
 
     //return; //Easy off/on switch
 
+    if(new Date().getSeconds() != 5) {
+        return;
+    }
+
     request({url:domain+"/v1/accounts/"+account_id+"/trades", headers: headers}, function(error, response, body){
         if(error){
             console.log(error);
         }else{
-            trades = JSON.parse(body).trades;     
+            trades = JSON.parse(body).trades;   
         }
     });
-
-    if(new Date().getSeconds() != 5) {
-        return;
-    }
 
 	//Get watchers that need to run
 	connection.query("SELECT * " + 
@@ -300,12 +300,14 @@ setInterval(function() {
                             return [c.openMid,c.highMid,c.lowMid,c.closeMid,c.volume];
                         });
 
-                        for(var i=0; i<candles.length; i++){
-                            for(var j=0; j<secondary_candles[i].length; j++){
-                                candles[i].push(secondary_candles[i][j]);
-                            }
+                        if(secondary_candles.length == candles.length){
+                           for(var i=0; i<candles.length; i++){
+                                for(var j=0; j<secondary_candles[i].length; j++){
+                                    candles[i].push(secondary_candles[i][j]);
+                                }
+                            } 
                         }
-
+                    
                         var server_time = new Date(last_time);
                         var watcher_time = new Date(watcher.last_updated);
 
@@ -335,36 +337,58 @@ setInterval(function() {
                                     currentBid = parseFloat(price.prices[0].bid);
                                     currentAsk = parseFloat(price.prices[0].ask);
 
+                                    //Close current trades if a certain profit is met
+                                    if(trades != null){
+                                        for(var i=0; i<trades.length; i++){
+                                            if(trades[i].instrument == watcher.instrument){
+                                                if(trades[i].side == 'buy'){
+                                                    trades[i].profit = ((currentBid-trades[i].price)*trades[i].units).toFixed(2);
+                                                }else{
+                                                    trades[i].profit = ((trades[i].price-currentAsk)*trades[i].units).toFixed(2);
+                                                }
+                                                //Current Close Strategy, sell if below 70 cents or higher than 50 cents
+                                                if( (trades[i].profit < -0.70) || 
+                                                    (trades[i].profit >= 0.70)){
+                                                    request.delete({url:domain+"/v1/accounts/"+account_id+"/trades/"+trades[i].id, headers: postHeaders}, function(error, response, body){
+                                                        var o = JSON.parse(body);
+                                                        console.log("[" + o.time + "] Closed order for " + o.instrument + " at " + o.profit + " profit");
+                                                    });
+                                                }
+
+                                            }
+                                        } 
+                                    }
+                                     
                                     spread = ((currentAsk-currentBid)/2).toFixed(5);
 
                                     var guessHigh = parseFloat(message[0]).toFixed(5);
                                     var guessLow = parseFloat(message[1]).toFixed(5);
                                     var guessClose = parseFloat(message[2]).toFixed(5);
 
-                                    if((guessHigh-currentAsk-spread).toFixed(5)>spread&&(guessClose-currentAsk-spread).toFixed(5)>0){
-                                        console.log("");
-                                        console.log(watcher.instrument);
-                                        console.log("The current ask price is "+ currentAsk + ", while the predicted high value is " + guessHigh + " and close value is " + guessClose);
-                                        if((guessHigh-currentAsk-spread).toFixed(5)>spread){
+                                    if((guessHigh-currentAsk-spread).toFixed(5)>0&&(guessClose-currentAsk-spread).toFixed(5)>0){
+                                        //console.log("");
+                                        //console.log(watcher.instrument);
+                                        //console.log("The current ask price is "+ currentAsk + ", while the predicted high value is " + guessHigh + " and close value is " + guessClose);
+                                        if((guessHigh-currentAsk-spread).toFixed(5)>0){
                                             console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (guessHigh-currentAsk-spread).toFixed(5).toString() + " pips based on the predicted high value if you buy.");
-                                            placeOrder(watcher.instrument, 2000, 'buy', guessHigh, 0);
+                                            placeOrder(watcher.instrument, 20000, 'buy', guessHigh, 0);
                                         }
                                         if((guessClose-currentAsk-spread).toFixed(5)>0){
-                                            console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (guessClose-currentAsk-spread).toFixed(5).toString() + " pips based on the predicted close value if you buy.");
+                                            //console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (guessClose-currentAsk-spread).toFixed(5).toString() + " pips based on the predicted close value if you buy.");
                                             //placeOrder(watcher.instrument, 2000, 'buy', guessClose, 0);
                                         }
                                     }
 
-                                    if((currentBid-guessLow-spread).toFixed(5)>spread&&(currentBid-guessClose-spread).toFixed(5)>0){
-                                        console.log("");
-                                        console.log(watcher.instrument);
-                                        console.log("The current bid price is "+ currentBid + ", while the predicted low value is " + guessLow + " and close value is " + guessClose);
-                                        if((currentBid-guessLow-spread).toFixed(5)>spread){
+                                    if((currentBid-guessLow-spread).toFixed(5)>0&&(currentBid-guessClose-spread).toFixed(5)>0){
+                                        //console.log("");
+                                        //console.log(watcher.instrument);
+                                        //console.log("The current bid price is "+ currentBid + ", while the predicted low value is " + guessLow + " and close value is " + guessClose);
+                                        if((currentBid-guessLow-spread).toFixed(5)>0){
                                             console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (currentBid-guessLow-spread).toFixed(5).toString() + " pips based on the predicted low value if you short.");
-                                            placeOrder(watcher.instrument, 2000, 'sell', guessLow, 0);
+                                            placeOrder(watcher.instrument, 20000, 'sell', guessLow, 0);
                                         }
                                         if((currentBid-guessClose-spread).toFixed(5)>0){
-                                            console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (currentBid-guessClose-spread).toFixed(5).toString() + " pips based on the predicted close value if you short.");
+                                            //console.log("Based on the spread of " + spread + " pips, money bot predicts you will gain " + (currentBid-guessClose-spread).toFixed(5).toString() + " pips based on the predicted close value if you short.");
                                             //placeOrder(watcher.instrument, 2000, 'sell', guessClose, 0);
                                         }                     
                                    }
@@ -461,7 +485,8 @@ function placeOrder(instrument, units, side, takeProfit, stopLoss){
         if(error){
             console.log(error);
         }else{
-            console.log(body);
+            var o = JSON.parse(body);
+            console.log("[" + o.time + "] Opened " + o.tradeOpened.side + " order for " + o.instrument + " at " + o.price);
         }
     });
             
