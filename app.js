@@ -347,8 +347,8 @@ setInterval(function() {
                                                     trades[i].profit = ((trades[i].price-currentAsk)*trades[i].units).toFixed(2);
                                                 }
                                                 //Current Close Strategy, sell if below 70 cents or higher than 50 cents
-                                                if( (trades[i].profit < -0.70) || 
-                                                    (trades[i].profit >= 0.70)){
+                                                if( (trades[i].profit < -7.00) || 
+                                                    (trades[i].profit >= 5.00)){
                                                     request.delete({url:domain+"/v1/accounts/"+account_id+"/trades/"+trades[i].id, headers: postHeaders}, function(error, response, body){
                                                         var o = JSON.parse(body);
                                                         console.log("[" + o.time + "] Closed order for " + o.instrument + " at " + o.profit + " profit");
@@ -486,7 +486,7 @@ function placeOrder(instrument, units, side, takeProfit, stopLoss){
             console.log(error);
         }else{
             var o = JSON.parse(body);
-            console.log("[" + o.time + "] Opened " + o.tradeOpened.side + " order for " + o.instrument + " at " + o.price);
+            console.log("[" + o.time + "] Opened order for " + o.instrument + " at " + o.price);
         }
     });
             
