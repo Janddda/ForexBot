@@ -91,7 +91,10 @@ for x in range(0,len(clf)):
 	for i in range(0, len(y_data)):
 
 		#split training and test data
-		x_train, x_test, y_train, y_test = train_test_split(x_data[:-1], y_data[i], train_size=train_percent, random_state=42)
+		#x_train, x_test, y_train, y_test = train_test_split(x_data[:-1], y_data[i], train_size=train_percent, random_state=42)
+
+		train_amount = math.ceil(len(x_data) * train_percent)
+		x_train, x_test, y_train, y_test = x_data[0:train_amount-1], x_data[train_amount:], y_data[i][1:train_amount], y_data[i][train_amount+1:]
 
 		clfg = GridSearchCV(clf[x],params[x],cv=5)
 		clfg.fit(x_train,y_train)

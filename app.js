@@ -223,7 +223,7 @@ app.get('/scores', function(req, res) {
 
 setInterval(function() {
 
-    //return; //Easy off/on switch
+    return; //Easy off/on switch
 
     if(new Date().getSeconds() != 5) {
         return;

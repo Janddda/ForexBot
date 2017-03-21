@@ -45,11 +45,11 @@ app.controller('myCtrl', function($scope, $http) {
     	{ value: "M", description: "1 month" }
     ];
     $scope.selectedGranularity = "M1";
-    $scope.selectedSecondaryGranularity = "M30";
+    $scope.selectedSecondaryGranularity = "M5";
 
-    $scope.candleCount = 2000;
+    $scope.candleCount = 650;
     $scope.trainPercent = 0.7;
-    $scope.n = 5;
+    $scope.n = 3;
 
     $scope.loading = false;
 
@@ -103,8 +103,40 @@ app.controller('myCtrl', function($scope, $http) {
                         return x.toFixed(5);
                         });
                     }
+
+                    var data = [];
+
+                    for(var q=1; q<c.answers[0].length; q++){
+                        data.push({x:q, y:[c.answers[2][q],c.answers[0][q],c.answers[1][q],c.answers[2][q]]});
+                    }
+
+                    var ch = new CanvasJS.Chart(c.name+"Chart",
+                    {
+                        title: {
+                            text: "Candles"
+                        },
+                        animationEnabled: false,
+                        axisX: {
+                            interval: 1,
+                            intervalType: "number",
+                            minimum: 1,
+                            maximum: c.answers[0].length
+                        },
+                        axisY: {
+                            minimum: Math.min.apply(Math,c.answers[1]),
+                            maximum: Math.max.apply(Math,c.answers[0])
+                        },
+                        data : [
+                        {
+                            type: "ohlc",
+                            dataPoints: data
+                        }
+                        ]
+                    });
+
+                    ch.render();
                     
-                    var ctx = document.getElementById(c.name+"Chart");
+                    /*var ctx = document.getElementById(c.name+"Chart");
 
                     var ch = new Chart(ctx, {
                         type: 'bar',
@@ -185,7 +217,7 @@ app.controller('myCtrl', function($scope, $http) {
                                 }]
                             }
                         }
-                    });
+                    }); */
 
                 }        
             },1000);
